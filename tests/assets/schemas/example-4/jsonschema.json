@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "jsonschema.json",
+  "title": "test schema for PonGO Schema",
+  "description": "test schema for PonGO Schema",
+  "type": "object",
+  "additionalItems": false,
+  "required": ["aString", "aDatetime"],
+  "properties": {
+    "aString": {
+      "description": "aString is casted, so in this case i add only the types covered by the tests",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 5
+        },
+        {
+          "type": "integer",
+          "min": 100,
+          "max": 10000
+        }
+      ]
+    },
+    "aDatetime": {
+      "description": "aString is casted, so in this case i add only the types covered by the tests",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "integer",
+          "description": "unix timestamp"
+        }
+      ]
+    }
+  }
+}

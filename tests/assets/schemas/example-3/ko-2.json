@@ -1,0 +1,15 @@
+{
+  "aString": "abc",
+  "aList": [
+    {
+      "aString": "abc",
+      "aBool": true
+    },
+    {
+      "aString": "abc",
+      "aBool": true
+    },
+    "test",
+    "test2"
+  ]
+}

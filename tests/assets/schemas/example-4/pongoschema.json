@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "foo": "bar"
+  },
+  "schema": {
+    "$type": "object",
+    "$body": {
+      "properties": {
+        "aString": {
+          "$type": "string",
+          "$body": {
+            "cast": true,
+            "minLen": 3,
+            "maxLen": 5
+          }
+        },
+        "aDatetime": {
+          "$type": "datetime",
+          "$body": {
+            "cast": true,
+            "before": "2025-08-01T09:00:00Z",
+            "after": "2020-08-01T09:00:00Z"
+          }
+        },
+        "aUncastableDatetime": {
+          "$type": "datetime",
+          "$body": {
+            "after": "2027-08-01T09:00:00Z"
+          }
+        }
+      },
+      "required": [
+        "aString",
+        "aDatetime"
+      ]
+    }
+  }
+}

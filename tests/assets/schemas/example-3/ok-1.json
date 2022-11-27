@@ -1,0 +1,11 @@
+{
+  "aString": "abc",
+  "aList": [
+    {
+      "aString": "abc",
+      "aBool": true
+    },
+    "test",
+    "test2"
+  ]
+}

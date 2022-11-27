@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "schema": {
+    "$type": "object",
+    "$body": {
+      "properties": {
+        "aString": {
+          "$type": "string",
+          "$metadata": {
+            "foo": "bar"
+          }
+        },
+        "aNestedObject": {
+          "$type": "object",
+          "$body": {
+            "properties": {
+              "aString": {
+                "$type": "string"
+              },
+              "aBool": {
+                "$type": "bool"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

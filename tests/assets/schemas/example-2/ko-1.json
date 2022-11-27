@@ -1,0 +1,6 @@
+{
+  "aString": "abc",
+  "aNestedObject": {
+    "aBool": "42"
+  }
+}

@@ -297,11 +297,5 @@ In order to implements a `SchemaType`, you'll need to impelment one of this two 
 * `BaseSchemaType`
 * `ProcessableSchemaType`
 
-> NB: the part below need to be reviewed
- 
-If your schema contains nested `Schema` (such as `ListType`, `ObjectType`, `AllOfType`) you must implement:
-* `ParentSchema`, if you have a single nested `SchemaType`
-* `ListSchema`, if you have a list of nested `SchemaType`
-* `ObjectSchema`, if you have a map[string] of nested `SchemaType`
-
-This implementation is required to correctly marshal/unmarshal the schema.
+If your schema contains nested `Schema` (such as `ListType`, `ObjectType`, `AllOfType`) you must implement `ParentSchema` 
+which return a list of the nested `Schema(s)`. This implementation is required to correctly marshal/unmarshal the `Schema(s)`.

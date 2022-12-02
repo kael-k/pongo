@@ -12,7 +12,7 @@ In SchemaType implementation, if is requested any SchemaType nesting, the implem
   this ensures that the marshaling is automatically done with Schema.MarshalJSON.
   In this way, the SchemaType implementation is not responsible for the marshaling process
 * if a SchemaType has any child, it MUST implement also ObjectSchema (if it has SchemaMap children),
-  ListSchema (for SchemaList children) or ParentSchema (if it has a single Schema child). The implementation
+  ParentSchema (for SchemaList children) or ParentSchema (if it has a single Schema child). The implementation
   is required for the unmarshalling process to recursively pass the SchemaUnmarshalMapper and resolve the correct
   SchemaType to unmarshal
 */
@@ -195,7 +195,7 @@ func (s *Schema) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
 	s.Metadata = unmarshal.Metadata
 
 	if unmarshal.Type == nil {
-		return fmt.Errorf("cannot unmarshal PongoSchema, no $type set in %v", s.rawJSON)
+		return fmt.Errorf("cannot unmarshal PongoSchema, no $type set in %s", s.rawJSON)
 	}
 
 	schemaType := mapper.Get(*unmarshal.Type)
@@ -246,20 +246,25 @@ func (s Schema) Children() (SchemaList, error) {
 		return nil, ErrNoSchemaTypeSet
 	}
 
-	switch schemaTypeParent := schemaType.(type) {
-	case ListSchema:
+	schemaTypeParent, ok := schemaType.(ParentSchema)
+	if ok {
 		return schemaTypeParent.Children(), nil
-	case ObjectSchema:
-		return Values[string, *Schema](schemaTypeParent.Children()), nil
-	case ParentSchema:
-		return SchemaList{schemaTypeParent.Child()}, nil
 	}
 
 	return SchemaList{}, nil
 }
 
-func (m SchemaMap) Children() SchemaMap {
-	return m
+func (m SchemaMap) Children() SchemaList {
+	list := SchemaList{}
+	for _, v := range m {
+		if v != nil {
+			list = append(list, v.Schema())
+		} else {
+			list = append(list, nil)
+		}
+	}
+
+	return list
 }
 
 func (l SchemaList) Children() SchemaList {
@@ -292,4 +297,20 @@ func (m *Metadata) Set(key string, value string) *Metadata {
 	(*m)[key] = value
 
 	return m
+}
+
+type ChildSchema struct {
+	*Schema
+}
+
+func (c ChildSchema) Children() SchemaList {
+	return SchemaList{c.Schema}
+}
+
+func (c ChildSchema) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.Schema)
+}
+
+func (c *ChildSchema) UnmarshalJSON(rawJSON []byte) error {
+	return json.Unmarshal(rawJSON, &c.Schema)
 }

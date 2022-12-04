@@ -66,3 +66,38 @@ func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMap
 
 	return schema, metadata, schema.unmarshalRawJSON(mapper)
 }
+
+type SchemaFactory func() SchemaType
+
+type SchemaUnmarshalMapper struct {
+	schemaElementsMap map[string]SchemaFactory
+}
+
+func SchemaUnmarshalMap() *SchemaUnmarshalMapper {
+	return &SchemaUnmarshalMapper{
+		map[string]SchemaFactory{},
+	}
+}
+
+var defaultSchemaList = map[string]SchemaFactory{
+	"anyOf":    func() SchemaType { return AnyOf(nil) },
+	"oneOf":    func() SchemaType { return OneOf(nil) },
+	"allOf":    func() SchemaType { return AllOf(nil) },
+	"list":     func() SchemaType { return List(nil) },
+	"object":   func() SchemaType { return Object(nil) },
+	"string":   func() SchemaType { return String() },
+	"int":      func() SchemaType { return Int() },
+	"float64":  func() SchemaType { return Float64() },
+	"bytes":    func() SchemaType { return Bytes() },
+	"bool":     func() SchemaType { return Bool() },
+	"datetime": func() SchemaType { return Datetime() },
+}
+
+func DefaultSchemaUnmarshalMap() *SchemaUnmarshalMapper {
+	s := SchemaUnmarshalMap()
+	for _, schemaFactory := range defaultSchemaList {
+		s = s.Set(schemaFactory)
+	}
+
+	return s
+}

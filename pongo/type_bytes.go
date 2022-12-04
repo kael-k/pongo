@@ -2,14 +2,13 @@ package pongo
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 )
 
 type BytesType struct {
-	Cast   ActionFlagProperty  `json:"cast,omitempty"`
-	MaxLen NumberProperty[int] `json:"maxLen,omitempty"`
-	MinLen NumberProperty[int] `json:"mixLen,omitempty"`
+	Cast   *ActionFlagProperty  `json:"cast,omitempty"`
+	MaxLen *NumberProperty[int] `json:"maxLen,omitempty"`
+	MinLen *NumberProperty[int] `json:"mixLen,omitempty"`
 }
 
 func Bytes() *BytesType {
@@ -59,22 +58,22 @@ func (b BytesType) Process(action SchemaAction, dataPointer *DataPointer) (data 
 }
 
 func (b BytesType) SetMinLen(i int) *BytesType {
-	b.MinLen.Set(i)
+	b.MinLen = b.MinLen.Set(i)
 	return &b
 }
 
 func (b BytesType) SetMaxLen(i int) *BytesType {
-	b.MaxLen.Set(i)
+	b.MaxLen = b.MaxLen.Set(i)
 	return &b
 }
 
 func (b BytesType) SetCast(cast bool) *BytesType {
-	b.Cast.Set(cast)
+	b.Cast = b.Cast.Set(cast)
 	return &b
 }
 
 func (b BytesType) SetCastActions(actions ...SchemaAction) *BytesType {
-	b.Cast.SetActions(actions...)
+	b.Cast = b.Cast.SetActions(actions...)
 	return &b
 }
 
@@ -85,21 +84,4 @@ func (b BytesType) UnsetCastActions(actions ...SchemaAction) *BytesType {
 
 func (b *BytesType) SchemaTypeID() string {
 	return "bytes"
-}
-
-func (b BytesType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	if !b.Cast.Empty() {
-		d["cast"] = b.Cast
-	}
-
-	if m, ok := b.MinLen.Get(); ok {
-		d["minLen"] = m
-	}
-
-	if m, ok := b.MaxLen.Get(); ok {
-		d["maxLen"] = m
-	}
-
-	return json.Marshal(d)
 }

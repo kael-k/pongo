@@ -1,15 +1,14 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 )
 
 type IntType struct {
-	Cast ActionFlagProperty  `json:"cast,omitempty"`
-	Min  NumberProperty[int] `json:"min,omitempty"`
-	Max  NumberProperty[int] `json:"max,omitempty"`
+	Cast *ActionFlagProperty  `json:"cast,omitempty"`
+	Min  *NumberProperty[int] `json:"min,omitempty"`
+	Max  *NumberProperty[int] `json:"max,omitempty"`
 }
 
 type IntTypeInterface interface {
@@ -74,12 +73,12 @@ func (i IntType) Process(action SchemaAction, dataPointer *DataPointer) (data Da
 }
 
 func (i IntType) SetCast(cast bool) *IntType {
-	i.Cast.Set(cast)
+	i.Cast = i.Cast.Set(cast)
 	return &i
 }
 
 func (i IntType) SetCastActions(actions ...SchemaAction) *IntType {
-	i.Cast.SetActions(actions...)
+	i.Cast = i.Cast.SetActions(actions...)
 	return &i
 }
 
@@ -89,33 +88,15 @@ func (i IntType) UnsetCastActions(actions ...SchemaAction) *IntType {
 }
 
 func (i IntType) SetMin(n int) *IntType {
-	i.Min.Set(n)
+	i.Min = i.Min.Set(n)
 	return &i
 }
 
 func (i IntType) SetMax(n int) *IntType {
-	i.Max.Set(n)
+	i.Max = i.Max.Set(n)
 	return &i
 }
 
 func (i *IntType) SchemaTypeID() string {
 	return "int"
-}
-
-func (i IntType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-
-	if !i.Cast.Empty() {
-		d["cast"] = i.Cast
-	}
-
-	if m, ok := i.Min.Get(); ok {
-		d["min"] = m
-	}
-
-	if m, ok := i.Max.Get(); ok {
-		d["max"] = m
-	}
-
-	return json.Marshal(d)
 }

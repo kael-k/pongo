@@ -23,19 +23,33 @@ func (a *ActionProperty[T]) UnsetActions(actions ...SchemaAction) {
 	}
 }
 
-func (a *ActionProperty[T]) SetAction(action SchemaAction, value T) {
+func (a *ActionProperty[T]) SetAction(action SchemaAction, value T) *ActionProperty[T] {
+	if a == nil {
+		a = &ActionProperty[T]{}
+	}
 	a.Actions[action] = value
+	return a
 }
 
-func (a *ActionProperty[T]) SetDefault(value T) {
+func (a *ActionProperty[T]) SetDefault(value T) *ActionProperty[T] {
+	if a == nil {
+		a = &ActionProperty[T]{}
+	}
 	a.Default = &value
+
+	return a
 }
 
 func (a *ActionProperty[T]) UnsetDefault() {
-	a.Default = nil
+	if a != nil {
+		a.Default = nil
+	}
 }
 
 func (a *ActionProperty[T]) GetDefault() (value T, ok bool) {
+	if a == nil {
+		return value, false
+	}
 	if a.Default != nil {
 		return *a.Default, ok
 	}
@@ -44,6 +58,9 @@ func (a *ActionProperty[T]) GetDefault() (value T, ok bool) {
 }
 
 func (a *ActionProperty[T]) GetAction(action SchemaAction) (value T, ok bool) {
+	if a == nil {
+		return value, false
+	}
 	if v, ok := a.Actions[action]; ok {
 		return v, true
 	}
@@ -52,11 +69,6 @@ func (a *ActionProperty[T]) GetAction(action SchemaAction) (value T, ok bool) {
 	}
 
 	return value, false
-}
-
-// Empty returns true if ActionFlagProperty.all is false and if no action has been set
-func (a ActionProperty[T]) Empty() bool {
-	return a.Default == nil && (a.Actions == nil || len(a.Actions) == 0)
 }
 
 // ActionFlagProperty describe if the SchemaType has a specific flag given the requested action
@@ -70,11 +82,16 @@ type ActionFlagProperty struct {
 	enabled map[SchemaAction]struct{}
 }
 
-func (a *ActionFlagProperty) SetActions(actions ...SchemaAction) {
+func (a *ActionFlagProperty) SetActions(actions ...SchemaAction) *ActionFlagProperty {
+	if a == nil {
+		a = &ActionFlagProperty{}
+	}
 	a.enabled = map[SchemaAction]struct{}{}
 	for _, action := range actions {
 		a.enabled[action] = struct{}{}
 	}
+
+	return a
 }
 
 func (a *ActionFlagProperty) AppendActions(actions ...SchemaAction) {
@@ -87,7 +104,7 @@ func (a *ActionFlagProperty) AppendActions(actions ...SchemaAction) {
 }
 
 func (a *ActionFlagProperty) UnsetActions(actions ...SchemaAction) {
-	if a.enabled == nil {
+	if a == nil || a.enabled == nil {
 		return
 	}
 	for _, action := range actions {
@@ -99,15 +116,25 @@ func (a *ActionFlagProperty) ResetActions() {
 	a.enabled = map[SchemaAction]struct{}{}
 }
 
-func (a *ActionFlagProperty) Set(all bool) {
+func (a *ActionFlagProperty) Set(all bool) *ActionFlagProperty {
+	if a == nil {
+		a = &ActionFlagProperty{}
+	}
 	a.all = all
+	return a
 }
 
-func (a ActionFlagProperty) Get() bool {
+func (a *ActionFlagProperty) Get() bool {
+	if a == nil {
+		return false
+	}
 	return a.all
 }
 
-func (a ActionFlagProperty) GetAction(action SchemaAction) bool {
+func (a *ActionFlagProperty) GetAction(action SchemaAction) bool {
+	if a == nil {
+		return false
+	}
 	if a.all {
 		return true
 	}
@@ -118,7 +145,10 @@ func (a ActionFlagProperty) GetAction(action SchemaAction) bool {
 	return ok
 }
 
-func (a ActionFlagProperty) GetActions() []SchemaAction {
+func (a *ActionFlagProperty) GetActions() []SchemaAction {
+	if a == nil {
+		return []SchemaAction{}
+	}
 	var l []SchemaAction
 
 	for action := range a.enabled {
@@ -126,11 +156,6 @@ func (a ActionFlagProperty) GetActions() []SchemaAction {
 	}
 
 	return l
-}
-
-// Empty returns true if ActionFlagProperty.all is false and if no action has been set
-func (a ActionFlagProperty) Empty() bool {
-	return !a.all && (a.enabled == nil || len(a.enabled) == 0)
 }
 
 func (a ActionFlagProperty) MarshalJSON() ([]byte, error) {
@@ -196,16 +221,23 @@ type NumberProperty[T int | int8 | int16 | int32 | int64 | uint | uint8 | uint16
 	n *T
 }
 
-func (m *NumberProperty[T]) Set(i T) {
+func (m *NumberProperty[T]) Set(i T) *NumberProperty[T] {
+	if m == nil {
+		m = &NumberProperty[T]{}
+	}
 	m.n = &i
+
+	return m
 }
 
 func (m *NumberProperty[T]) Unset() {
-	m.n = nil
+	if m != nil {
+		m.n = nil
+	}
 }
 
 func (m *NumberProperty[T]) Get() (i T, ok bool) {
-	if m.n == nil {
+	if m == nil || m.n == nil {
 		return 0, false
 	}
 	return *m.n, true
@@ -230,16 +262,24 @@ type TimeProperty struct {
 	t *time.Time
 }
 
-func (b *TimeProperty) Set(i time.Time) {
+func (b *TimeProperty) Set(i time.Time) *TimeProperty {
+	if b == nil {
+		b = &TimeProperty{}
+	}
 	b.t = &i
+
+	return b
 }
 
 func (b *TimeProperty) Unset() {
+	if b == nil {
+		return
+	}
 	b.t = nil
 }
 
 func (b *TimeProperty) Get() (i time.Time, ok bool) {
-	if b.t == nil {
+	if b == nil || b.t == nil {
 		return time.Time{}, false
 	}
 	return *b.t, true

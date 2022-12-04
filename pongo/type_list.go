@@ -1,14 +1,13 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
 type ListType struct {
-	Type   *SchemaNode         `json:"type"`
-	MinLen NumberProperty[int] `json:"minLen,omitempty"`
-	MaxLen NumberProperty[int] `json:"maxLen,omitempty"`
+	Type   *SchemaNode          `json:"type"`
+	MinLen *NumberProperty[int] `json:"minLen,omitempty"`
+	MaxLen *NumberProperty[int] `json:"maxLen,omitempty"`
 }
 
 func List(schema SchemaType) *ListType {
@@ -69,12 +68,12 @@ func (l ListType) Process(action SchemaAction, dataPointer *DataPointer) (data D
 }
 
 func (l ListType) SetMinLen(i int) *ListType {
-	l.MinLen.Set(i)
+	l.MinLen = l.MinLen.Set(i)
 	return &l
 }
 
 func (l ListType) SetMaxLen(i int) *ListType {
-	l.MaxLen.Set(i)
+	l.MaxLen = l.MaxLen.Set(i)
 	return &l
 }
 
@@ -84,19 +83,4 @@ func (l *ListType) SchemaTypeID() string {
 
 func (l *ListType) Children() SchemaList {
 	return SchemaList{l.Type}
-}
-
-func (l ListType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	d["type"] = l.Type
-
-	if m, ok := l.MinLen.Get(); ok {
-		d["minLen"] = m
-	}
-
-	if m, ok := l.MaxLen.Get(); ok {
-		d["maxLen"] = m
-	}
-
-	return json.Marshal(d)
 }

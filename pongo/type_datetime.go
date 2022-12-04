@@ -1,16 +1,15 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
 
 type DatetimeType struct {
-	Format ActionProperty[string] `json:"format,omitempty"`
-	Cast   ActionFlagProperty     `json:"cast,omitempty"`
-	Before TimeProperty           `json:"before,omitempty"`
-	After  TimeProperty           `json:"after,omitempty"`
+	Format *ActionProperty[string] `json:"format,omitempty"`
+	Cast   *ActionFlagProperty     `json:"cast,omitempty"`
+	Before *TimeProperty           `json:"before,omitempty"`
+	After  *TimeProperty           `json:"after,omitempty"`
 }
 
 func Datetime() *DatetimeType {
@@ -65,12 +64,12 @@ func (d *DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (d
 }
 
 func (d *DatetimeType) SetFormat(f string) *DatetimeType {
-	d.Format.SetDefault(f)
+	d.Format = d.Format.SetDefault(f)
 	return d
 }
 
 func (d *DatetimeType) SetFormatWithAction(action SchemaAction, f string) *DatetimeType {
-	d.Format.SetAction(action, f)
+	d.Format = d.Format.SetAction(action, f)
 	return d
 }
 
@@ -84,12 +83,12 @@ func (d DatetimeType) GetFormat(action SchemaAction) string {
 	return time.RFC3339Nano
 }
 func (d *DatetimeType) SetCast(cast bool) *DatetimeType {
-	d.Cast.Set(cast)
+	d.Cast = d.Cast.Set(cast)
 	return d
 }
 
 func (d DatetimeType) SetCastActions(actions ...SchemaAction) *DatetimeType {
-	d.Cast.SetActions(actions...)
+	d.Cast = d.Cast.SetActions(actions...)
 	return &d
 }
 
@@ -99,37 +98,15 @@ func (d DatetimeType) UnsetCastActions(actions ...SchemaAction) *DatetimeType {
 }
 
 func (d *DatetimeType) SetBefore(f time.Time) *DatetimeType {
-	d.Before.Set(f)
+	d.Before = d.Before.Set(f)
 	return d
 }
 
 func (d *DatetimeType) SetAfter(f time.Time) *DatetimeType {
-	d.After.Set(f)
+	d.After = d.After.Set(f)
 	return d
 }
 
 func (d *DatetimeType) SchemaTypeID() string {
 	return "datetime"
-}
-
-func (d DatetimeType) MarshalJSON() ([]byte, error) {
-	var v = map[string]interface{}{}
-
-	if !d.Cast.Empty() {
-		v["cast"] = d.Cast
-	}
-
-	if m, ok := d.Before.Get(); ok {
-		v["before"] = m
-	}
-
-	if m, ok := d.After.Get(); ok {
-		v["after"] = m
-	}
-
-	if !d.Format.Empty() {
-		v["format"] = d.Format
-	}
-
-	return json.Marshal(v)
 }

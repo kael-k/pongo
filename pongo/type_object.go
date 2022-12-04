@@ -1,13 +1,12 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
 type ObjectType struct {
 	SchemaMap `json:"properties"`
-	Required  []string `json:"required"`
+	Required  []string `json:"required,omitempty"`
 }
 
 func Object(properties O) *ObjectType {
@@ -77,15 +76,4 @@ func (o ObjectType) Require(requires ...string) *ObjectType {
 
 func (o *ObjectType) SchemaTypeID() string {
 	return "object"
-}
-
-func (o ObjectType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	d["properties"] = o.SchemaMap
-
-	if len(o.Required) > 0 {
-		d["required"] = o.Required
-	}
-
-	return json.Marshal(d)
 }

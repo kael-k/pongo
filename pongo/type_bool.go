@@ -1,20 +1,19 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
 
 type BoolType struct {
-	Cast ActionFlagProperty `json:"cast,omitempty"`
+	Cast *ActionFlagProperty `json:"cast,omitempty"`
 }
 
 func Bool() *BoolType {
 	return &BoolType{}
 }
 
-func (b BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) {
+func (b *BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) {
 	var parsedBool bool
 	var err error
 
@@ -54,33 +53,24 @@ func (b BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) 
 		return parsedBool, nil
 	}
 
-	return nil, NewSchemaErrorWithError(data.Path(), ErrInvalidAction(&b, action))
+	return nil, NewSchemaErrorWithError(data.Path(), ErrInvalidAction(b, action))
 }
 
 func (b *BoolType) SetCast(cast bool) *BoolType {
-	b.Cast.Set(cast)
+	b.Cast = b.Cast.Set(cast)
 	return b
 }
 
-func (b BoolType) SetCastActions(actions ...SchemaAction) *BoolType {
-	b.Cast.SetActions(actions...)
-	return &b
+func (b *BoolType) SetCastActions(actions ...SchemaAction) *BoolType {
+	b.Cast = b.Cast.SetActions(actions...)
+	return b
 }
 
-func (b BoolType) UnsetCastActions(actions ...SchemaAction) *BoolType {
+func (b *BoolType) UnsetCastActions(actions ...SchemaAction) *BoolType {
 	b.Cast.UnsetActions(actions...)
-	return &b
+	return b
 }
 
 func (b *BoolType) SchemaTypeID() string {
 	return "bool"
-}
-
-func (b BoolType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	if !b.Cast.Empty() {
-		d["cast"] = b.Cast
-	}
-
-	return json.Marshal(d)
 }

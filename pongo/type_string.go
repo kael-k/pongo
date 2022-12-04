@@ -1,15 +1,14 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 )
 
 type StringType struct {
-	Cast   ActionFlagProperty  `json:"cast,omitempty"`
-	MinLen NumberProperty[int] `json:"minLen,omitempty"`
-	MaxLen NumberProperty[int] `json:"maxLen,omitempty"`
+	Cast   *ActionFlagProperty  `json:"cast,omitempty"`
+	MinLen *NumberProperty[int] `json:"minLen,omitempty"`
+	MaxLen *NumberProperty[int] `json:"maxLen,omitempty"`
 }
 
 func String() *StringType {
@@ -55,12 +54,12 @@ func (s StringType) Process(action SchemaAction, dataPointer *DataPointer) (data
 }
 
 func (s StringType) SetCast(cast bool) *StringType {
-	s.Cast.Set(cast)
+	s.Cast = s.Cast.Set(cast)
 	return &s
 }
 
 func (s StringType) SetCastActions(actions ...SchemaAction) *StringType {
-	s.Cast.SetActions(actions...)
+	s.Cast = s.Cast.SetActions(actions...)
 	return &s
 }
 
@@ -70,32 +69,15 @@ func (s StringType) UnsetCastActions(actions ...SchemaAction) *StringType {
 }
 
 func (s StringType) SetMinLen(i int) *StringType {
-	s.MinLen.Set(i)
+	s.MinLen = s.MinLen.Set(i)
 	return &s
 }
 
 func (s StringType) SetMaxLen(i int) *StringType {
-	s.MaxLen.Set(i)
+	s.MaxLen = s.MaxLen.Set(i)
 	return &s
 }
 
 func (s *StringType) SchemaTypeID() string {
 	return "string"
-}
-
-func (s StringType) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	if !s.Cast.Empty() {
-		d["cast"] = s.Cast
-	}
-
-	if m, ok := s.MinLen.Get(); ok {
-		d["minLen"] = m
-	}
-
-	if m, ok := s.MaxLen.Get(); ok {
-		d["maxLen"] = m
-	}
-
-	return json.Marshal(d)
 }

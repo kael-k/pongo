@@ -18,12 +18,3 @@ func ListMapDiff[T comparable](a []T, mb map[T]interface{}) []T {
 	}
 	return diff
 }
-
-func Values[K comparable, V any](m map[K]V) []V {
-	var arr []V
-	for _, v := range m {
-		arr = append(arr, v)
-	}
-
-	return arr
-}

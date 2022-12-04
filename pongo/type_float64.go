@@ -1,15 +1,14 @@
 package pongo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 )
 
 type Float64Type struct {
-	Cast ActionFlagProperty      `json:"cast,omitempty"`
-	Min  NumberProperty[float64] `json:"min,omitempty"`
-	Max  NumberProperty[float64] `json:"max,omitempty"`
+	Cast *ActionFlagProperty      `json:"cast,omitempty"`
+	Min  *NumberProperty[float64] `json:"min,omitempty"`
+	Max  *NumberProperty[float64] `json:"max,omitempty"`
 }
 
 func Float64() *Float64Type {
@@ -69,12 +68,12 @@ func (f64 Float64Type) Process(action SchemaAction, dataPointer *DataPointer) (d
 }
 
 func (f64 Float64Type) SetCast(cast bool) *Float64Type {
-	f64.Cast.Set(cast)
+	f64.Cast = f64.Cast.Set(cast)
 	return &f64
 }
 
 func (f64 Float64Type) SetCastActions(actions ...SchemaAction) *Float64Type {
-	f64.Cast.SetActions(actions...)
+	f64.Cast = f64.Cast.SetActions(actions...)
 	return &f64
 }
 
@@ -84,32 +83,15 @@ func (f64 Float64Type) UnsetCastActions(actions ...SchemaAction) *Float64Type {
 }
 
 func (f64 Float64Type) SetMin(f float64) *Float64Type {
-	f64.Min.Set(f)
+	f64.Min = f64.Min.Set(f)
 	return &f64
 }
 
 func (f64 Float64Type) SetMax(f float64) *Float64Type {
-	f64.Max.Set(f)
+	f64.Max = f64.Max.Set(f)
 	return &f64
 }
 
 func (f64 *Float64Type) SchemaTypeID() string {
 	return "float64"
-}
-
-func (f64 Float64Type) MarshalJSON() ([]byte, error) {
-	var d = map[string]interface{}{}
-	if !f64.Cast.Empty() {
-		d["cast"] = true
-	}
-
-	if m, ok := f64.Min.Get(); ok {
-		d["min"] = m
-	}
-
-	if m, ok := f64.Max.Get(); ok {
-		d["max"] = m
-	}
-
-	return json.Marshal(d)
 }

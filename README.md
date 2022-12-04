@@ -1,5 +1,7 @@
 # PonGO Schema
 
+![logo](https://repository-images.githubusercontent.com/574236489/645c9b8c-ecce-44c2-a82e-1351a992580e)
+*logo credits to [@herbrandh](https://github.com/herbrandh)*
 ## Introduction
 
 PonGO Schema is a library which provide rich and powerful validation, parsing  and serializing data.

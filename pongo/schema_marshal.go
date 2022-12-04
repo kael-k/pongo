@@ -11,11 +11,11 @@ func MarshalSchemaJSON(schema SchemaType) ([]byte, error) {
 
 func MarshalSchemaJSONWithMetadata(schema SchemaType, metadata *Metadata) ([]byte, error) {
 	d := map[string]interface{}{
-		"version": "1.0",
-		"schema":  Schema(schema),
+		"$version": "1.0",
+		"$body":    Schema(schema),
 	}
 	if metadata != nil {
-		d["metadata"] = metadata
+		d["$metadata"] = metadata
 	}
 	return json.Marshal(d)
 }
@@ -38,7 +38,7 @@ func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMap
 		return nil, nil, err
 	}
 
-	version, ok := (*root)["version"]
+	version, ok := (*root)["$version"]
 	if !ok {
 		return nil, nil, errors.New("expected schema version \"1.0\" in JSON, no version found")
 	}
@@ -47,7 +47,7 @@ func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMap
 		return nil, nil, errors.New("expected schema version \"1.0\" in JSON, found " + string(version))
 	}
 
-	jsonSchema, ok = (*root)["schema"]
+	jsonSchema, ok = (*root)["$body"]
 	if !ok {
 		return nil, nil, errors.New("expected schema body in JSON, no schema found")
 	}
@@ -55,7 +55,7 @@ func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMap
 	schema = NewEmptySchema()
 	schema.rawJSON = jsonSchema
 
-	jsonMetadata, ok := (*root)["metadata"]
+	jsonMetadata, ok := (*root)["$metadata"]
 	if ok {
 		metadata = &Metadata{}
 		err = json.Unmarshal(jsonMetadata, metadata)

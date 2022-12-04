@@ -1,11 +1,11 @@
 {
-  "version": "1.0",
-  "metadata": {
+  "$version": "1.0",
+  "$metadata": {
     "foo": {
       "baz": "baf"
     }
   },
-  "schema": {
+  "$body": {
     "$type": "object",
     "$body": {
       "properties": {

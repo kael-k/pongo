@@ -2,8 +2,7 @@
 
 ## Introduction
 
-PonGO Schema is a part of the PonGO suite library, `pongoschema` library provide rich and powerful validation, parsing
-and serializing data.
+PonGO Schema is a library which provide rich and powerful validation, parsing  and serializing data.
 
 These are some library features and use case:
 

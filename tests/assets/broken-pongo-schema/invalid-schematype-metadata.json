@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "schema": {
+    "$type": "object",
+    "$body": {
+      "properties": {
+        "aString": {
+          "$type": "string"
+        },
+        "aInt": {
+          "$type": "int",
+          "$body": {
+            "min": 10,
+            "cast": [
+              "PARSE"
+            ]
+          }
+        },
+        "aDouble": {
+          "$type": "float64",
+          "$metadata": {
+            "foo": {
+              "baz": "baf"
+            }
+          },
+          "$body": {
+            "min": 1,
+            "cast": true
+          }
+        },
+        "aBytes": {
+          "$type": "bytes",
+          "$body": {
+            "cast": true
+          }
+        }
+      }
+    }
+  }
+}

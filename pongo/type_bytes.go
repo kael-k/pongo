@@ -16,51 +16,46 @@ func Bytes() *BytesType {
 	return &BytesType{}
 }
 
-func (b BytesType) Parse(data *DataPointer) (parsedData Data, err error) {
-	return b.parse(data, SchemaActionParse)
-}
-
-func (b BytesType) Serialize(data *DataPointer) (serializedData Data, err error) {
-	bytes, err := b.parse(data, SchemaActionSerialize)
-	if err != nil {
-		return nil, err
-	}
-
-	return base64.StdEncoding.EncodeToString(bytes), nil
-}
-
-func (b BytesType) parse(data *DataPointer, action SchemaAction) (bytes []byte, err error) {
+func (b BytesType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
+	var bytes []byte
 	if b.Cast.GetAction(action) {
-		switch r := data.Get().(type) {
+		switch r := dataPointer.Get().(type) {
 		case string:
 			bytes, err = base64.StdEncoding.DecodeString(r)
 			if err != nil {
-				return nil, NewSchemaErrorWithError(data.Path(), err)
+				return nil, NewSchemaErrorWithError(dataPointer.Path(), err)
 			}
 		case []byte:
 			bytes = r
 		case byte:
 			bytes = []byte{r}
 		default:
-			return nil, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s cannot cast to String", data.Path()))
+			return nil, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s cannot cast to String", dataPointer.Path()))
 		}
 
 	} else {
 		var ok bool
-		bytes, ok = data.Get().([]byte)
+		bytes, ok = dataPointer.Get().([]byte)
 		if !ok {
-			return nil, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s is not a \"bytes\"", data.Path()))
+			return nil, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s is not a \"bytes\"", dataPointer.Path()))
 		}
 	}
 
 	if l, ok := b.MinLen.Get(); ok && l > len(bytes) {
-		return nil, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s length is %d (min: %d)", data.Path(), len(bytes), b.MinLen))
+		return nil, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s length is %d (min: %d)", dataPointer.Path(), len(bytes), b.MinLen))
 	}
 	if l, ok := b.MaxLen.Get(); ok && l < len(bytes) {
-		return nil, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s length is %d (Max: %d)", data.Path(), len(bytes), b.MaxLen))
+		return nil, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s length is %d (Max: %d)", dataPointer.Path(), len(bytes), b.MaxLen))
 	}
 
-	return bytes, nil
+	switch action {
+	case SchemaActionSerialize:
+		return base64.StdEncoding.EncodeToString(bytes), nil
+	case SchemaActionParse:
+		return bytes, nil
+	}
+
+	return nil, ErrInvalidAction(b, action)
 }
 
 func (b BytesType) SetMinLen(i int) *BytesType {
@@ -88,12 +83,8 @@ func (b BytesType) UnsetCastActions(actions ...SchemaAction) *BytesType {
 	return &b
 }
 
-func (b *BytesType) SchemaTypeID() (string, error) {
-	return "bytes", nil
-}
-
-func (b *BytesType) Schema() *Schema {
-	return NewBaseSchema(b)
+func (b *BytesType) SchemaTypeID() string {
+	return "bytes"
 }
 
 func (b BytesType) MarshalJSON() ([]byte, error) {

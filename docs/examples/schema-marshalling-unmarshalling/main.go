@@ -28,7 +28,7 @@ func main() {
 		fmt.Printf("unmarshalled schema: type: %s, schemaType\n", reflect.TypeOf(newSchema).String())
 	}
 
-	if reflect.DeepEqual(schema, newSchema.Schema().Type()) {
+	if reflect.DeepEqual(schema, pongo.Schema(newSchema).Type()) {
 		fmt.Printf("original schema and the unmarshalled one match")
 	} else {
 		panic("original schema and the unmarshalled one do not match")

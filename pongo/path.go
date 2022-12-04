@@ -31,7 +31,7 @@ func (e PathElement) Data() Data {
 	return e.data
 }
 
-func (e PathElement) Schema() any {
+func (e PathElement) Schema() SchemaType {
 	return e.schemaType
 }
 
@@ -66,10 +66,7 @@ func (path Path) String() string {
 	var stringPath = ""
 
 	for _, pathElement := range path.elements {
-		schemaTypeID, err := SchemaTypeID(pathElement.schemaType)
-		if err != nil {
-			schemaTypeID = "ErrUnknownType"
-		}
+		schemaTypeID := SchemaTypeID(pathElement.schemaType)
 		stringPath += fmt.Sprintf("%s%s<%s>", PathSeparator, pathElement.key, schemaTypeID)
 	}
 

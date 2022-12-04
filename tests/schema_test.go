@@ -82,17 +82,17 @@ func testSchemaCheckTest(t *testing.T, testCase testSchemaCase, testData pongo.D
 func TestSchemaMetadata(t *testing.T) {
 	s := pongo.NewEmptySchema()
 	if v, ok := s.GetMetadata("foo"); ok {
-		t.Errorf("expected ok == false on new Schema GetMetadata(\"foo\"), got [%v, %v]", ok, v)
+		t.Errorf("expected ok == false on new SchemaNode GetMetadata(\"foo\"), got [%v, %v]", ok, v)
 	}
 	s.SetMetadata("foo", "bar")
 
 	if v, ok := s.GetMetadata("foo"); !ok || v != "bar" {
-		t.Errorf("expected ok == true and v == \"bar\" on Schema GetMetadata(\"foo\"), got [%v, %v]", ok, v)
+		t.Errorf("expected ok == true and v == \"bar\" on SchemaNode GetMetadata(\"foo\"), got [%v, %v]", ok, v)
 	}
 
 	s.SetMetadata("foo", "baz")
 
 	if v, ok := s.GetMetadata("foo"); !ok || v != "baz" {
-		t.Errorf("expected ok == true and v == \"baz\" on Schema GetMetadata(\"foo\"), got [%v, %v]", ok, v)
+		t.Errorf("expected ok == true and v == \"baz\" on SchemaNode GetMetadata(\"foo\"), got [%v, %v]", ok, v)
 	}
 }

@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-var ErrNoSchemaTypeSet = fmt.Errorf("this Schema has no valid SchemaType set")
-var ErrInvalidSchemaType = fmt.Errorf("schema type must implement SchemaType or ProcessableSchemaType")
+var ErrNoSchemaTypeSet = fmt.Errorf("this SchemaNode has no valid SchemaType set")
 
 func ErrInvalidAction(schemaType SchemaType, action SchemaAction) error {
 	return fmt.Errorf("cannot execute schema action %s on schema type %v", action, schemaType)

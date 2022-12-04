@@ -1,7 +1,7 @@
 package pongo
 
-// AnyOfType SchemaType expose a Process method which run the given SchemaAction until a Schema
-// from the SchemaType list given at construction time until a Schema return a result with no error
+// AnyOfType SchemaType expose a Process method which run the given SchemaAction until a SchemaNode
+// from the SchemaType list given at construction time until a SchemaNode return a result with no error
 type AnyOfType struct {
 	SchemaList `json:"elements"`
 }
@@ -31,10 +31,6 @@ func (e AnyOfType) Process(action SchemaAction, data *DataPointer) (processedDat
 	return nil, err
 }
 
-func (e *AnyOfType) SchemaTypeID() (string, error) {
-	return "anyOf", nil
-}
-
-func (e *AnyOfType) Schema() *Schema {
-	return NewProcessableSchema(e)
+func (e *AnyOfType) SchemaTypeID() string {
+	return "anyOf"
 }

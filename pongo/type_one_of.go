@@ -2,7 +2,7 @@ package pongo
 
 import "fmt"
 
-// OneOfType SchemaType expose a Process method which run the given SchemaAction on all Schema(s)
+// OneOfType SchemaType expose a Process method which run the given SchemaAction on all SchemaNode(s)
 // from the SchemaType list given at construction time, exactly one schema must process with no error
 type OneOfType struct {
 	SchemaList `json:"elements"`
@@ -42,10 +42,6 @@ func (e OneOfType) Process(action SchemaAction, data *DataPointer) (processedDat
 	return processedData, nil
 }
 
-func (e OneOfType) SchemaTypeID() (string, error) {
-	return "oneOf", nil
-}
-
-func (e *OneOfType) Schema() *Schema {
-	return NewProcessableSchema(e)
+func (e OneOfType) SchemaTypeID() string {
+	return "oneOf"
 }

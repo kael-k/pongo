@@ -6,7 +6,7 @@ import (
 )
 
 type ListType struct {
-	Type   *Schema             `json:"type"`
+	Type   *SchemaNode         `json:"type"`
 	MinLen NumberProperty[int] `json:"minLen,omitempty"`
 	MaxLen NumberProperty[int] `json:"maxLen,omitempty"`
 }
@@ -16,7 +16,7 @@ func List(schema SchemaType) *ListType {
 		return &ListType{Type: nil}
 	}
 	return &ListType{
-		Type: schema.Schema(),
+		Type: Schema(schema),
 	}
 }
 
@@ -78,12 +78,8 @@ func (l ListType) SetMaxLen(i int) *ListType {
 	return &l
 }
 
-func (l *ListType) SchemaTypeID() (string, error) {
-	return "list", nil
-}
-
-func (l *ListType) Schema() *Schema {
-	return NewProcessableSchema(l)
+func (l *ListType) SchemaTypeID() string {
+	return "list"
 }
 
 func (l *ListType) Children() SchemaList {

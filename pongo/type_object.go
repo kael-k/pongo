@@ -75,12 +75,8 @@ func (o ObjectType) Require(requires ...string) *ObjectType {
 	return &o
 }
 
-func (o *ObjectType) SchemaTypeID() (string, error) {
-	return "object", nil
-}
-
-func (o *ObjectType) Schema() *Schema {
-	return NewProcessableSchema(o)
+func (o *ObjectType) SchemaTypeID() string {
+	return "object"
 }
 
 func (o ObjectType) MarshalJSON() ([]byte, error) {

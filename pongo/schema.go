@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-/* These pongo are used to wrap SchemaType instances.
+/* These types are used to wrap SchemaType instances.
 The wrappers function is to support the schema marshal/unmarshal process:
 In SchemaType implementation, if is requested any SchemaType nesting, the implementation must:
-* store the nested schema using one of Schema (for 0..1 SchemaType), SchemaList (for SchemaType list) or SchemaMap (for Maps)
-  this ensures that the marshaling is automatically done with Schema.MarshalJSON.
+* store the nested schema using one of SchemaNode (for 0..1 SchemaType), SchemaList (for SchemaType list) or SchemaMap (for Maps)
+  this ensures that the marshaling is automatically done with SchemaNode.MarshalJSON.
   In this way, the SchemaType implementation is not responsible for the marshaling process
 * if a SchemaType has any child, it MUST implement also ObjectSchema (if it has SchemaMap children),
-  ParentSchema (for SchemaList children) or ParentSchema (if it has a single Schema child). The implementation
+  ParentSchema (for SchemaList children) or ParentSchema (if it has a single SchemaNode child). The implementation
   is required for the unmarshalling process to recursively pass the SchemaUnmarshalMapper and resolve the correct
   SchemaType to unmarshal
 */
@@ -24,7 +24,7 @@ func (o O) SchemaMap() SchemaMap {
 	m := SchemaMap{}
 	for k, v := range o {
 		if v != nil {
-			m[k] = v.Schema()
+			m[k] = Schema(v)
 		} else {
 			m[k] = nil
 		}
@@ -36,7 +36,7 @@ func (l L) SchemaList() SchemaList {
 	list := SchemaList{}
 	for _, v := range l {
 		if v != nil {
-			list = append(list, v.Schema())
+			list = append(list, Schema(v))
 		} else {
 			list = append(list, nil)
 		}
@@ -45,124 +45,62 @@ func (l L) SchemaList() SchemaList {
 	return list
 }
 
-type SchemaMap map[string]*Schema
-type SchemaList []*Schema
+type SchemaMap map[string]*SchemaNode
+type SchemaList []*SchemaNode
 
-type Schema struct {
-	ProcessableSchemaType
-	BaseSchemaType
+type SchemaNode struct {
+	SchemaType
 
 	Metadata *Metadata
 	rawJSON  []byte
 }
 
-func NewEmptySchema() *Schema {
-	return &Schema{}
+func NewEmptySchema() *SchemaNode {
+	return &SchemaNode{}
 }
 
-func NewSchema(schema SchemaType) (s *Schema, err error) {
-	s = NewEmptySchema()
-	err = s.SetType(schema)
-
-	return
-}
-
-func NewBaseSchema(schema BaseSchemaType) *Schema {
-	return &Schema{
-		BaseSchemaType: schema,
+func Schema(schema SchemaType) *SchemaNode {
+	if s, ok := schema.(*SchemaNode); ok {
+		return s
+	}
+	return &SchemaNode{
+		SchemaType: schema,
 	}
 }
 
-func NewProcessableSchema(schema ProcessableSchemaType) *Schema {
-	return &Schema{
-		ProcessableSchemaType: schema,
-	}
+func (s SchemaNode) Parse(data *DataPointer) (Data, error) {
+	return s.Process(SchemaActionParse, data)
 }
 
-func (s Schema) IsProcessableSchema() bool {
-	return s.ProcessableSchemaType != nil
+func (s SchemaNode) Serialize(data *DataPointer) (Data, error) {
+	return s.Process(SchemaActionSerialize, data)
 }
 
-func (s Schema) IsSchemaType() bool {
-	return s.BaseSchemaType != nil
+func (s SchemaNode) Type() (schemaType SchemaType) {
+	return s.SchemaType
 }
 
-func (s Schema) Parse(data *DataPointer) (Data, error) {
-	if s.IsSchemaType() {
-		return s.BaseSchemaType.Parse(data)
-	}
-	if s.IsProcessableSchema() {
-		return s.ProcessableSchemaType.Process(SchemaActionParse, data)
+func (s *SchemaNode) SetType(schemaType SchemaType) {
+	s.SchemaType = schemaType
+}
+
+func (s SchemaNode) Process(action SchemaAction, data *DataPointer) (Data, error) {
+	if s.SchemaType != nil {
+		return s.SchemaType.Process(action, data)
 	}
 
 	return nil, ErrNoSchemaTypeSet
 }
 
-func (s Schema) Serialize(data *DataPointer) (Data, error) {
-	if s.IsSchemaType() {
-		return s.BaseSchemaType.Serialize(data)
-	}
-	if s.IsProcessableSchema() {
-		return s.ProcessableSchemaType.Process(SchemaActionSerialize, data)
-	}
-
-	return nil, ErrNoSchemaTypeSet
-}
-
-func (s Schema) Type() (schemaType SchemaType) {
-	if s.IsSchemaType() {
-		return s.BaseSchemaType
-	}
-	if s.IsProcessableSchema() {
-		return s.ProcessableSchemaType
-	}
-
-	return nil
-}
-
-func (s *Schema) SetType(schemaType interface{}) error {
-	switch t := schemaType.(type) {
-	case BaseSchemaType:
-		s.BaseSchemaType = t
-		s.ProcessableSchemaType = nil
-	case ProcessableSchemaType:
-		s.BaseSchemaType = nil
-		s.ProcessableSchemaType = t
-	default:
-		return ErrInvalidSchemaType
-	}
-	return nil
-}
-
-func (s Schema) Process(action SchemaAction, data *DataPointer) (Data, error) {
-	if s.IsProcessableSchema() {
-		return s.ProcessableSchemaType.Process(action, data)
-	}
-	if s.IsSchemaType() {
-		switch action {
-		case SchemaActionParse:
-			return s.BaseSchemaType.Parse(data)
-		case SchemaActionSerialize:
-			return s.BaseSchemaType.Serialize(data)
-		default:
-			return nil, fmt.Errorf("cannot Process schema at path %s: cannot run action %s on SchemaType", data.Path(), action)
-		}
-	}
-
-	return nil, ErrNoSchemaTypeSet
-}
-
-func (s *Schema) MarshalJSON() ([]byte, error) {
+func (s *SchemaNode) MarshalJSON() ([]byte, error) {
 	schemaType := s.Type()
-	k, err := SchemaTypeID(schemaType)
-	if err != nil {
-		return nil, err
-	}
+	k := SchemaTypeID(schemaType)
 	var marshalled marshalSchemaType
 	var schemaTypeJSON json.RawMessage
 
 	marshalled.Type = &k
 
+	var err error
 	schemaTypeJSON, err = json.Marshal(schemaType)
 	if err != nil {
 		return nil, fmt.Errorf("cannot marshal PongoSchema: %w", err)
@@ -177,12 +115,12 @@ func (s *Schema) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshalled)
 }
 
-func (s *Schema) UnmarshalJSON(jsonSchema []byte) error {
+func (s *SchemaNode) UnmarshalJSON(jsonSchema []byte) error {
 	s.rawJSON = jsonSchema
 	return nil
 }
 
-func (s *Schema) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
+func (s *SchemaNode) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
 	defer s.cleanRawJSON()
 	var unmarshal marshalSchemaType
 
@@ -210,11 +148,7 @@ func (s *Schema) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
 		}
 	}
 
-	err = s.SetType(schemaType)
-
-	if err != nil {
-		return err
-	}
+	s.SetType(schemaType)
 
 	children, err := s.Children()
 	if err != nil {
@@ -232,15 +166,11 @@ func (s *Schema) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
 	return nil
 }
 
-func (s *Schema) cleanRawJSON() {
+func (s *SchemaNode) cleanRawJSON() {
 	s.rawJSON = nil
 }
 
-func (s *Schema) Schema() *Schema {
-	return s
-}
-
-func (s Schema) Children() (SchemaList, error) {
+func (s SchemaNode) Children() (SchemaList, error) {
 	var schemaType = s.Type()
 	if schemaType == nil {
 		return nil, ErrNoSchemaTypeSet
@@ -258,7 +188,7 @@ func (m SchemaMap) Children() SchemaList {
 	list := SchemaList{}
 	for _, v := range m {
 		if v != nil {
-			list = append(list, v.Schema())
+			list = append(list, Schema(v))
 		} else {
 			list = append(list, nil)
 		}
@@ -271,11 +201,11 @@ func (l SchemaList) Children() SchemaList {
 	return l
 }
 
-func (s Schema) GetMetadata(key string) (value string, ok bool) {
+func (s SchemaNode) GetMetadata(key string) (value string, ok bool) {
 	return s.Metadata.Get(key)
 }
 
-func (s *Schema) SetMetadata(key string, value string) *Schema {
+func (s *SchemaNode) SetMetadata(key string, value string) *SchemaNode {
 	s.Metadata = s.Metadata.Set(key, value)
 	return s
 }

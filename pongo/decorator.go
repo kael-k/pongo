@@ -55,17 +55,13 @@ func (d *DecoratedType) UnsetHandlers(actions ...SchemaAction) {
 	}
 }
 
-func (d *DecoratedType) SchemaTypeID() (string, error) {
+func (d *DecoratedType) SchemaTypeID() string {
 	if d != nil {
 		return SchemaTypeID(d.OriginalType)
 	}
 
 	// this should return an error
 	return SchemaTypeID(nil)
-}
-
-func (d *DecoratedType) Schema() *Schema {
-	return NewProcessableSchema(d)
 }
 
 func (d DecoratedType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
@@ -78,5 +74,5 @@ func (d DecoratedType) Process(action SchemaAction, dataPointer *DataPointer) (d
 		return d.defaultHandler(d.OriginalType, action, dataPointer)
 	}
 
-	return d.OriginalType.Schema().Process(action, dataPointer)
+	return Schema(d.OriginalType).Process(action, dataPointer)
 }

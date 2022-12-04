@@ -1,8 +1,8 @@
 package pongo
 
-// AllOfType SchemaType expose a Process method which run the given SchemaAction on all Schema
+// AllOfType SchemaType expose a Process method which run the given SchemaAction on all SchemaNode
 // from the SchemaType list given at construction time return the result of the last SchemaType if
-// no error is encountered during the processing of the previous Schema
+// no error is encountered during the processing of the previous SchemaNode
 type AllOfType struct {
 	SchemaList `json:"elements"`
 	Chain      ActionFlagProperty `json:"chain"`
@@ -63,10 +63,6 @@ func (e AllOfType) UnsetChainActions(actions ...SchemaAction) *AllOfType {
 	return &e
 }
 
-func (e *AllOfType) SchemaTypeID() (string, error) {
-	return "allOf", nil
-}
-
-func (e *AllOfType) Schema() *Schema {
-	return NewProcessableSchema(e)
+func (e *AllOfType) SchemaTypeID() string {
+	return "allOf"
 }

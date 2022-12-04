@@ -13,12 +13,9 @@ func TestDecorator(t *testing.T) {
 	}
 	decoratedString.SetHandlers(handlerFn, pongo.SchemaActionParse)
 
-	schemaTypeID, err := pongo.SchemaTypeID(decoratedString)
-	if err != nil {
-		t.Errorf("error getting SchemaTypeID for decorated StringType: %s", err)
-	}
+	schemaTypeID := pongo.SchemaTypeID(decoratedString)
 	if schemaTypeID != "string" {
-		t.Errorf("expected SchemaTypeID for decorated StringType == \"string\", got %s", err)
+		t.Errorf("expected SchemaTypeID for decorated StringType == \"string\", got %s", schemaTypeID)
 	}
 
 	r, err := pongo.Process(decoratedString, pongo.SchemaActionParse, "foo")

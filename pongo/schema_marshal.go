@@ -12,7 +12,7 @@ func MarshalSchemaJSON(schema SchemaType) ([]byte, error) {
 func MarshalSchemaJSONWithMetadata(schema SchemaType, metadata *Metadata) ([]byte, error) {
 	d := map[string]interface{}{
 		"version": "1.0",
-		"schema":  schema.Schema(),
+		"schema":  Schema(schema),
 	}
 	if metadata != nil {
 		d["metadata"] = metadata
@@ -26,11 +26,11 @@ type marshalSchemaType struct {
 	Type     *string          `json:"$type"`
 }
 
-func UnmarshalSchemaJSON(jsonSchema []byte) (schema *Schema, metadata *Metadata, err error) {
+func UnmarshalSchemaJSON(jsonSchema []byte) (schema *SchemaNode, metadata *Metadata, err error) {
 	return UnmarshalSchemaJSONWithMapper(jsonSchema, DefaultSchemaUnmarshalMap())
 }
 
-func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMapper) (schema *Schema, metadata *Metadata, err error) {
+func UnmarshalSchemaJSONWithMapper(jsonSchema []byte, mapper *SchemaUnmarshalMapper) (schema *SchemaNode, metadata *Metadata, err error) {
 	var root *map[string]json.RawMessage
 
 	err = json.Unmarshal(jsonSchema, &root)

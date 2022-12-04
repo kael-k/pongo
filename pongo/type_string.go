@@ -79,12 +79,8 @@ func (s StringType) SetMaxLen(i int) *StringType {
 	return &s
 }
 
-func (s *StringType) SchemaTypeID() (string, error) {
-	return "string", nil
-}
-
-func (s *StringType) Schema() *Schema {
-	return NewProcessableSchema(s)
+func (s *StringType) SchemaTypeID() string {
+	return "string"
 }
 
 func (s StringType) MarshalJSON() ([]byte, error) {

@@ -72,12 +72,8 @@ func (b BoolType) UnsetCastActions(actions ...SchemaAction) *BoolType {
 	return &b
 }
 
-func (b *BoolType) SchemaTypeID() (string, error) {
-	return "bool", nil
-}
-
-func (b *BoolType) Schema() *Schema {
-	return NewProcessableSchema(b)
+func (b *BoolType) SchemaTypeID() string {
+	return "bool"
 }
 
 func (b BoolType) MarshalJSON() ([]byte, error) {

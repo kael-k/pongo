@@ -278,7 +278,7 @@ if err != nil {
     fmt.Printf("unmarshalled schema: type: %s, schemaType\n", reflect.TypeOf(newSchema).String())
 }
 
-if reflect.DeepEqual(schema, newSchema.Schema().Type()) {
+if reflect.DeepEqual(schema, pongo.Schema(newSchema).Type()) {
     fmt.Printf("original schema and the unmarshalled one match")
 } else {
     panic("original schema and the unmarshalled one do not match")
@@ -293,9 +293,15 @@ original schema and the unmarshalled one match
 
 ### Implementing a `SchemaType`
 
-In order to implements a `SchemaType`, you'll need to impelment one of this two interface:
-* `BaseSchemaType`
-* `ProcessableSchemaType`
+In order to create a valid "type" for the pongo library, you need to implement a `SchemaType`.
 
-If your schema contains nested `Schema` (such as `ListType`, `ObjectType`, `AllOfType`) you must implement `ParentSchema` 
-which return a list of the nested `Schema(s)`. This implementation is required to correctly marshal/unmarshal the `Schema(s)`.
+If your schema contains nested `SchemaType`(s) (such as `ListType`, `ObjectType`, `AllOfType`) you must implement `ParentSchema` 
+which return a list of the nested `SchemaNode`(s). This implementation is required to correctly marshal/unmarshal the `Schema`(s).
+
+If you need to unmarshal your custom type, you'll also need to use a custom `SchemaUnmarshalMapper` which contains your custom type.
+When you'll unmarshal your PonGO schema, you must pass to the unmarshal function your custom map
+
+```go
+myCustomMapper = pongo.DefaultSchemaUnmarshalMap().set()
+myPonGOSchema, err := pongo.UnmarshalSchemaJSONWithMapper(myPonGOSchemaJSON, myCustomMapper)
+```

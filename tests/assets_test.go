@@ -28,15 +28,8 @@ type testSchemaMarshall struct {
 }
 
 func DecoratedSchemaUnmarshalMapper() *pongo.SchemaUnmarshalMapper {
-	m, err := pongo.DefaultSchemaUnmarshalMap().Set(func() pongo.SchemaType {
-		return pongo.Decorate(pongo.Int())
-	})
-
-	if err != nil {
-		panic("unexpected error, cannot create DecoratedSchemaUnmarshalMapper: " + err.Error())
-	}
-
-	return m
+	return pongo.DefaultSchemaUnmarshalMap().
+		Set(func() pongo.SchemaType { return pongo.Decorate(pongo.Int()) })
 }
 
 // testsSchemaMarshall string should be the test dir name wrt testRootSchemas
@@ -54,7 +47,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 	"example-2": {
 		"example-2",
 		pongo.Object(pongo.O{
-			"aString": pongo.String().Schema().SetMetadata("foo", "bar"),
+			"aString": pongo.Schema(pongo.String()).SetMetadata("foo", "bar"),
 			"aNestedObject": pongo.Object(pongo.O{
 				"aString": pongo.String(),
 				"aBool":   pongo.Bool(),
@@ -117,7 +110,7 @@ func (t testSchemaMarshall) GetJSONSchema() (gojsonschema.JSONLoader, error) {
 	return gojsonschema.NewBytesLoader(rawJSONSchema), nil
 }
 
-func (t testSchemaMarshall) GetPongoSchema() (*pongo.Schema, *pongo.Metadata, error) {
+func (t testSchemaMarshall) GetPongoSchema() (*pongo.SchemaNode, *pongo.Metadata, error) {
 	rawPongoSchema, err := os.ReadFile(fmt.Sprintf("%s/%s", t.TestDirPath(), testPongoSchemaFilename))
 	if err != nil {
 		return nil, nil, err

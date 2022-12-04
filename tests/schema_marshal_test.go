@@ -27,7 +27,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 			t.Errorf("error test schema unmarshall %s, error on unmarshall JSON: %s", testID, err)
 			continue
 		}
-		if !reflect.DeepEqual(schema, schemaType.wantSchema.Schema()) {
+		if !reflect.DeepEqual(schema, pongo.Schema(schemaType.wantSchema)) {
 			t.Errorf("error test schema unmarshall %s, unmarshalled schema does not match the wanted one", testID)
 			continue
 		}
@@ -60,36 +60,18 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 
 type TestDummySchemaType struct{}
 
-func (t TestDummySchemaType) Schema() *pongo.Schema {
-	return pongo.NewBaseSchema(t)
-}
-
-func (t TestDummySchemaType) Validate(_ *pongo.DataPointer) (err error) {
-	return fmt.Errorf("not implemented")
-}
-
-func (t TestDummySchemaType) Parse(_ *pongo.DataPointer) (parsedData pongo.Data, err error) {
-	return nil, fmt.Errorf("not implemented")
-}
-
-func (t TestDummySchemaType) Serialize(_ *pongo.DataPointer) (serializedData pongo.Data, err error) {
+func (t TestDummySchemaType) Process(_ pongo.SchemaAction, _ *pongo.DataPointer) (parsedData pongo.Data, err error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
 func TestSchemaTypeID(t *testing.T) {
-	test, err := pongo.SchemaTypeID(&TestDummySchemaType{})
+	test := pongo.SchemaTypeID(&TestDummySchemaType{})
 	if test != "tests.TestDummySchemaType" {
 		t.Errorf("error test SchemaTypeID() with testing.TestDummySchemaType, expected id $testing.TestDummySchemaType, got %s", test)
 	}
-	if err != nil {
-		t.Errorf("error test SchemaTypeID() with testing.TestDummySchemaType, unexpected error: %s", err)
-	}
 
-	test, err = pongo.SchemaTypeID(pongo.String())
+	test = pongo.SchemaTypeID(pongo.String())
 	if test != "string" {
 		t.Errorf("error test SchemaTypeID() with testing.TestDummySchemaType, expected id $testing.TestDummySchemaType, got %s", test)
-	}
-	if err != nil {
-		t.Errorf("error test SchemaTypeID() with testing.TestDummySchemaType, unexpected error: %s", err)
 	}
 }

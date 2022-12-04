@@ -20,14 +20,6 @@ func Int() *IntType {
 	return &IntType{}
 }
 
-func (i IntType) Parse(data *DataPointer) (parsedData Data, err error) {
-	return i.parse(data, SchemaActionParse)
-}
-
-func (i IntType) Serialize(data *DataPointer) (serializedData Data, err error) {
-	return i.parse(data, SchemaActionSerialize)
-}
-
 func (i IntType) cast(data *DataPointer) (n int, err error) {
 	switch n := data.Get().(type) {
 	case int:
@@ -51,25 +43,31 @@ func (i IntType) cast(data *DataPointer) (n int, err error) {
 	return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: cannot cast %s to \"Int\"", data.Path()))
 }
 
-func (i IntType) parse(data *DataPointer, action SchemaAction) (n int, err error) {
+func (i IntType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
+	var n int
+
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(i, action)
+	}
+
 	if !i.Cast.GetAction(action) {
 		var ok bool
-		n, ok = data.Get().(int)
+		n, ok = dataPointer.Get().(int)
 		if !ok {
-			return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s is not a \"Int\"", data.Path()))
+			return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s is not a \"Int\"", dataPointer.Path()))
 		}
 	} else {
-		n, err = i.cast(data)
+		n, err = i.cast(dataPointer)
 		if err != nil {
 			return 0, err
 		}
 	}
 
 	if m, ok := i.Min.Get(); ok && m > n {
-		return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s value is %d (Max: %d)", data.Path(), n, i.Max))
+		return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s value is %d (Max: %d)", dataPointer.Path(), n, i.Max))
 	}
 	if m, ok := i.Max.Get(); ok && m < n {
-		return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s length is %d (min: %d)", data.Path(), n, i.Min))
+		return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s length is %d (min: %d)", dataPointer.Path(), n, i.Min))
 	}
 
 	return n, nil
@@ -100,12 +98,8 @@ func (i IntType) SetMax(n int) *IntType {
 	return &i
 }
 
-func (i *IntType) SchemaTypeID() (string, error) {
-	return "int", nil
-}
-
-func (i *IntType) Schema() *Schema {
-	return NewBaseSchema(i)
+func (i *IntType) SchemaTypeID() string {
+	return "int"
 }
 
 func (i IntType) MarshalJSON() ([]byte, error) {

@@ -108,12 +108,8 @@ func (d *DatetimeType) SetAfter(f time.Time) *DatetimeType {
 	return d
 }
 
-func (d *DatetimeType) Schema() *Schema {
-	return NewProcessableSchema(d)
-}
-
-func (d *DatetimeType) SchemaTypeID() (string, error) {
-	return "datetime", nil
+func (d *DatetimeType) SchemaTypeID() string {
+	return "datetime"
 }
 
 func (d DatetimeType) MarshalJSON() ([]byte, error) {

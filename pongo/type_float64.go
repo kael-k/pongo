@@ -16,14 +16,6 @@ func Float64() *Float64Type {
 	return &Float64Type{}
 }
 
-func (f64 Float64Type) Parse(data *DataPointer) (parsedData Data, err error) {
-	return f64.parse(data, SchemaActionParse)
-}
-
-func (f64 Float64Type) Serialize(data *DataPointer) (serializedData Data, err error) {
-	return f64.parse(data, SchemaActionSerialize)
-}
-
 func (f64 Float64Type) cast(data *DataPointer) (n float64, err *SchemaError) {
 	switch n := data.Get().(type) {
 	case int:
@@ -45,25 +37,32 @@ func (f64 Float64Type) cast(data *DataPointer) (n float64, err *SchemaError) {
 	return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: cannot cast %s to \"Float64\"", data.Path()))
 }
 
-func (f64 Float64Type) parse(data *DataPointer, action SchemaAction) (n float64, err *SchemaError) {
+func (f64 Float64Type) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
+	var n float64
+
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(f64, action)
+	}
+
 	if !f64.Cast.GetAction(action) {
 		var ok bool
-		n, ok = data.Get().(float64)
+		n, ok = dataPointer.Get().(float64)
 		if !ok {
-			return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s is not a \"Float64\"", data.Path()))
+			return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s is not a \"Float64\"", dataPointer.Path()))
 		}
 	} else {
-		n, err = f64.cast(data)
-		if err != nil {
-			return 0, err
+		var schemaErr *SchemaError
+		n, schemaErr = f64.cast(dataPointer)
+		if schemaErr != nil {
+			return 0, schemaErr
 		}
 	}
 
 	if m, ok := f64.Min.Get(); ok && m > n {
-		return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s value is %f (Min: %f)", data.Path(), n, m))
+		return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s value is %f (Min: %f)", dataPointer.Path(), n, m))
 	}
 	if m, ok := f64.Max.Get(); ok && m < n {
-		return 0, NewSchemaErrorWithError(data.Path(), fmt.Errorf("schema does not validate: %s length is %f (Max: %f)", data.Path(), n, m))
+		return 0, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("schema does not validate: %s length is %f (Max: %f)", dataPointer.Path(), n, m))
 	}
 
 	return n, nil
@@ -94,12 +93,8 @@ func (f64 Float64Type) SetMax(f float64) *Float64Type {
 	return &f64
 }
 
-func (f64 *Float64Type) SchemaTypeID() (string, error) {
-	return "float64", nil
-}
-
-func (f64 *Float64Type) Schema() *Schema {
-	return NewBaseSchema(f64)
+func (f64 *Float64Type) SchemaTypeID() string {
+	return "float64"
 }
 
 func (f64 Float64Type) MarshalJSON() ([]byte, error) {

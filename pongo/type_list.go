@@ -6,24 +6,24 @@ import (
 )
 
 type ListType struct {
-	Type   ChildSchema         `json:"type"`
+	Type   *Schema             `json:"type"`
 	MinLen NumberProperty[int] `json:"minLen,omitempty"`
 	MaxLen NumberProperty[int] `json:"maxLen,omitempty"`
 }
 
 func List(schema SchemaType) *ListType {
 	if schema == nil {
-		return &ListType{Type: ChildSchema{}}
+		return &ListType{Type: nil}
 	}
 	return &ListType{
-		Type: ChildSchema{schema.Schema()},
+		Type: schema.Schema(),
 	}
 }
 
 func (l ListType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
 	var schemaError = NewSchemaError()
 
-	if l.Type.Schema == nil {
+	if l.Type == nil {
 		return nil, NewSchemaErrorWithError(dataPointer.Path(), fmt.Errorf("cannot %s data as ListType at %s, BaseSchemaType provided for \"List\" items is nil", action, dataPointer.Path()))
 	}
 
@@ -87,7 +87,7 @@ func (l *ListType) Schema() *Schema {
 }
 
 func (l *ListType) Children() SchemaList {
-	return l.Type.Children()
+	return SchemaList{l.Type}
 }
 
 func (l ListType) MarshalJSON() ([]byte, error) {

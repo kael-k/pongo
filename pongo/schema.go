@@ -298,19 +298,3 @@ func (m *Metadata) Set(key string, value string) *Metadata {
 
 	return m
 }
-
-type ChildSchema struct {
-	*Schema
-}
-
-func (c ChildSchema) Children() SchemaList {
-	return SchemaList{c.Schema}
-}
-
-func (c ChildSchema) MarshalJSON() ([]byte, error) {
-	return json.Marshal(c.Schema)
-}
-
-func (c *ChildSchema) UnmarshalJSON(rawJSON []byte) error {
-	return json.Unmarshal(rawJSON, &c.Schema)
-}

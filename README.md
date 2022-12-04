@@ -266,7 +266,7 @@ if err != nil {
 Output:
 ```
 marshalled schema:
-{"schema":{"$body":{"properties":{"aInt":{"$type":"int"},"aString":{"$type":"string"}}},"$type":"object"},"version":"1.0"}
+{"$body":{"$body":{"properties":{"aInt":{"$type":"int"},"aString":{"$type":"string"}}},"$type":"object"},"$version":"1.0"}
 ```
 
 To unmarshall back the schema

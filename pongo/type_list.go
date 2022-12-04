@@ -86,8 +86,8 @@ func (l *ListType) Schema() *Schema {
 	return NewProcessableSchema(l)
 }
 
-func (l ListType) Child() *Schema {
-	return l.Type
+func (l *ListType) Children() SchemaList {
+	return SchemaList{l.Type}
 }
 
 func (l ListType) MarshalJSON() ([]byte, error) {

@@ -41,25 +41,12 @@ type CustomSchemaTypeID interface {
 	SchemaTypeID() (string, error)
 }
 
-// ObjectSchema is a Schema type with nested inside one or more schemas in a wrapped map[string]*Schema (SchemaMap)
+// ParentSchema is a Schema type nested inside one or more schemas in a wrapped []*Schema (SchemaList)
 // the implementation must return all the *Schema direct children
-type ObjectSchema interface {
-	// Children return all direct Children of the *Schema as the original SchemaMap
-	Children() SchemaMap
-}
-
-// ListSchema is a Schema type nested inside one or more schemas in a wrapped []*Schema (SchemaList)
-// the implementation must return all the *Schema direct children
-type ListSchema interface {
+type ParentSchema interface {
+	SchemaType
 	// Children return all direct Children of the *Schema as the original SchemaMap
 	Children() SchemaList
-}
-
-// ParentSchema is a  with nested inside one schema in a wrapped Schema
-// the implementation must return the address of the child Schema
-type ParentSchema interface {
-	// Child Schema address
-	Child() *Schema
 }
 
 type SchemaFactory func() SchemaType

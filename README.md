@@ -13,7 +13,7 @@ These are some library features and use case:
 * a schema is dynamically defined with objects, in contrast with a static schema defined by struct.
 * marshall/unmarshall the schema in JSON
 
-The library is expired by the Python [Schema library](https://pypi.org/project/schema/),
+The library is inspired by the Python [Schema library](https://pypi.org/project/schema/),
 plus the option to serialize and deserialize the schema (like an "enrich" `jsonschema`) and the data (for example to
 convert some "library specific" data types, such `time.Time`, into a more JSON-friendly `string`)
 

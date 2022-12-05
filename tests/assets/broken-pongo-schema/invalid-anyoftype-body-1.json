@@ -1,0 +1,47 @@
+{
+  "$version": "1.0",
+  "$metadata": {
+    "foo": "bar"
+  },
+  "$body": {
+    "$type": "object",
+    "$body": {
+      "properties": {
+        "aString": {
+          "$type": "string"
+        },
+        "aList": {
+          "$type": "list",
+          "$body": {
+            "type": {
+              "$type": "anyOf",
+              "$body": {
+                "elements": {
+                  "$type": "object",
+                  "$body": {
+                    "properties": {
+                      "aString": {
+                        "$type": "string",
+                        "$body": {
+                          "cast": true
+                        }
+                      },
+                      "aBool": {
+                        "$type": "bool"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "minLen": 1,
+            "maxLen": 3
+          }
+        }
+      },
+      "required": [
+        "aList"
+      ]
+    }
+  }
+}

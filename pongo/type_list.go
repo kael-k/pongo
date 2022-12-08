@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -83,4 +84,33 @@ func (l *ListType) SchemaTypeID() string {
 
 func (l *ListType) Children() SchemaList {
 	return SchemaList{l.Type}
+}
+
+func (l ListType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	jsonObject := map[string]interface{}{
+		"type": "array",
+	}
+
+	if m, ok := l.MinLen.Get(); ok {
+		jsonObject["minItems"] = m
+	}
+	if m, ok := l.MaxLen.Get(); ok {
+		jsonObject["maxItems"] = m
+	}
+
+	if l.Type == nil {
+		return json.Marshal(jsonObject)
+	}
+
+	var childJSON json.RawMessage
+	var err error
+
+	childJSON, err = MarshalJSONSchema(l.Type, action)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonObject["items"] = childJSON
+
+	return json.Marshal(jsonObject)
 }

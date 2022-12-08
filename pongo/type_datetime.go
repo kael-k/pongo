@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -16,7 +17,7 @@ func Datetime() *DatetimeType {
 	return &DatetimeType{}
 }
 
-func (d *DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
+func (d DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
 	var t time.Time
 	var ok bool
 
@@ -109,4 +110,15 @@ func (d *DatetimeType) SetAfter(f time.Time) *DatetimeType {
 
 func (d *DatetimeType) SchemaTypeID() string {
 	return "datetime"
+}
+
+func (d DatetimeType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse {
+		return nil, ErrInvalidAction(d, action)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"type":   "string",
+		"format": "date-time",
+	})
 }

@@ -1,5 +1,7 @@
 package pongo
 
+import "encoding/json"
+
 // AnyOfType SchemaType expose a Process method which run the given SchemaAction until a SchemaNode
 // from the SchemaType list given at construction time until a SchemaNode return a result with no error
 type AnyOfType struct {
@@ -33,4 +35,23 @@ func (e AnyOfType) Process(action SchemaAction, data *DataPointer) (processedDat
 
 func (e *AnyOfType) SchemaTypeID() string {
 	return "anyOf"
+}
+
+func (e AnyOfType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	var childrenJSON []json.RawMessage
+
+	for _, child := range e.Children() {
+		j, err := MarshalJSONSchema(child, action)
+		if err != nil {
+			return nil, err
+		}
+		if j == nil {
+			continue
+		}
+		childrenJSON = append(childrenJSON, j)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"anyOf": childrenJSON,
+	})
 }

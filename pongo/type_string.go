@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -80,4 +81,32 @@ func (s StringType) SetMaxLen(i int) *StringType {
 
 func (s *StringType) SchemaTypeID() string {
 	return "string"
+}
+
+func (s StringType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(s, action)
+	}
+
+	var jsonObject = map[string]interface{}{"type": "string"}
+
+	if l, ok := s.MinLen.Get(); ok {
+		jsonObject["minLength"] = l
+	}
+	if l, ok := s.MaxLen.Get(); ok {
+		jsonObject["maxLength"] = l
+	}
+
+	if !s.Cast.GetAction(action) {
+		return json.Marshal(jsonObject)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"oneOf": []map[string]interface{}{
+			jsonObject,
+			{
+				"type": "number",
+			},
+		},
+	})
 }

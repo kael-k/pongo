@@ -2,13 +2,14 @@ package pongo
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
 var ErrNoSchemaTypeSet = fmt.Errorf("this SchemaNode has no valid SchemaType set")
 
 func ErrInvalidAction(schemaType SchemaType, action SchemaAction) error {
-	return fmt.Errorf("cannot execute schema action %s on schema type %v", action, schemaType)
+	return fmt.Errorf("cannot execute schema action %s on schema type %s", action, reflect.TypeOf(schemaType).Name())
 }
 
 type SchemaError struct {

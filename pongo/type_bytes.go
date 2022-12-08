@@ -2,6 +2,7 @@ package pongo
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 )
 
@@ -84,4 +85,15 @@ func (b BytesType) UnsetCastActions(actions ...SchemaAction) *BytesType {
 
 func (b *BytesType) SchemaTypeID() string {
 	return "bytes"
+}
+
+func (b BytesType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse {
+		return nil, ErrInvalidAction(b, action)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"type":            "string",
+		"contentEncoding": "base64",
+	})
 }

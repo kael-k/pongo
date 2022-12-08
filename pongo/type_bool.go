@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -13,7 +14,7 @@ func Bool() *BoolType {
 	return &BoolType{}
 }
 
-func (b *BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) {
+func (b BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) {
 	var parsedBool bool
 	var err error
 
@@ -73,4 +74,29 @@ func (b *BoolType) UnsetCastActions(actions ...SchemaAction) *BoolType {
 
 func (b *BoolType) SchemaTypeID() string {
 	return "bool"
+}
+
+func (b BoolType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(b, action)
+	}
+
+	var jsonObject = map[string]interface{}{"type": "boolean"}
+
+	if !b.Cast.GetAction(action) {
+		return json.Marshal(jsonObject)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"oneOf": []map[string]interface{}{
+			jsonObject,
+			{
+				"type": "number",
+			},
+			{
+				"type":    "string",
+				"pattern": "^(?i)(true|false)$'",
+			},
+		},
+	})
 }

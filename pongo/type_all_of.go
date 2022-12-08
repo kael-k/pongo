@@ -1,5 +1,7 @@
 package pongo
 
+import "encoding/json"
+
 // AllOfType SchemaType expose a Process method which run the given SchemaAction on all SchemaNode
 // from the SchemaType list given at construction time return the result of the last SchemaType if
 // no error is encountered during the processing of the previous SchemaNode
@@ -65,4 +67,23 @@ func (e AllOfType) UnsetChainActions(actions ...SchemaAction) *AllOfType {
 
 func (e *AllOfType) SchemaTypeID() string {
 	return "allOf"
+}
+
+func (e AllOfType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	var childrenJSON []json.RawMessage
+
+	for _, child := range e.Children() {
+		j, err := MarshalJSONSchema(child, action)
+		if err != nil {
+			return nil, err
+		}
+		if j == nil {
+			continue
+		}
+		childrenJSON = append(childrenJSON, j)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"allOf": childrenJSON,
+	})
 }

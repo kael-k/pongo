@@ -126,3 +126,7 @@ var globalUnmarshalMapper = &SchemaUnmarshalMapper{
 func GlobalSchemaUnmarshalMap() *SchemaUnmarshalMapper {
 	return globalUnmarshalMapper.Clone()
 }
+
+func SetGlobalSchemaUnmarshalMap(newGlobalScheme *SchemaUnmarshalMapper) {
+	globalUnmarshalMapper = newGlobalScheme
+}

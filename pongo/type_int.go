@@ -126,7 +126,7 @@ func (i IntType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 			jsonObject,
 			{
 				"type":    "string",
-				"pattern": "/^-?([0-9]+)$/",
+				"pattern": "^-?([0-9]+)$",
 			},
 		},
 	})

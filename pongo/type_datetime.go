@@ -34,6 +34,10 @@ func (d DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (da
 			t = time.Unix(int64(r), 0)
 		case int64:
 			t = time.Unix(r, 0)
+		case float64:
+			t = time.Unix(int64(r), 0)
+		case float32:
+			t = time.Unix(int64(r), 0)
 		case time.Time:
 			t = r
 		default:
@@ -113,6 +117,10 @@ func (d *DatetimeType) SchemaTypeID() string {
 }
 
 func (d DatetimeType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if !d.Cast.GetAction(action) {
+		return nil, fmt.Errorf("%w: Cast must be enabled in order to JSONschema-marshal the type", ErrSchemaNotJSONSchemaMarshalable)
+	}
+
 	if action != SchemaActionParse {
 		return nil, ErrInvalidAction(d, action)
 	}

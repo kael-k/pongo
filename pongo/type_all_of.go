@@ -81,6 +81,9 @@ func (e AllOfType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 			continue
 		}
 		childrenJSON = append(childrenJSON, j)
+		if e.Chain.GetAction(action) {
+			break
+		}
 	}
 
 	return json.Marshal(map[string]interface{}{

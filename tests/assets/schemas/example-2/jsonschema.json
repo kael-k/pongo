@@ -1,14 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "jsonschema.json",
-  "title": "test schema for PonGO Schema",
-  "description": "test schema for PonGO Schema",
   "type": "object",
-  "additionalItems": false,
+  "additionalProperties": false,
   "properties": {
     "aNestedObject": {
       "type": "object",
-      "additionalItems": false,
+      "additionalProperties": false,
       "properties": {
         "aString": {
           "type": "string"

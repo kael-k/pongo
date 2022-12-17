@@ -3,6 +3,7 @@ package pongo
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 /* These types are used to wrap SchemaType instances.
@@ -17,36 +18,10 @@ In SchemaType implementation, if is requested any SchemaType nesting, the implem
   SchemaType to unmarshal
 */
 
-type O map[string]SchemaType
-type L []SchemaType
-
-func (o O) SchemaMap() SchemaMap {
-	m := SchemaMap{}
-	for k, v := range o {
-		if v != nil {
-			m[k] = Schema(v)
-		} else {
-			m[k] = nil
-		}
-	}
-
-	return m
+// SchemaType is SchemaNode type that expose a generic Process function
+type SchemaType interface {
+	Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error)
 }
-func (l L) SchemaList() SchemaList {
-	list := SchemaList{}
-	for _, v := range l {
-		if v != nil {
-			list = append(list, Schema(v))
-		} else {
-			list = append(list, nil)
-		}
-	}
-
-	return list
-}
-
-type SchemaMap map[string]*SchemaNode
-type SchemaList []*SchemaNode
 
 type SchemaNode struct {
 	SchemaType
@@ -184,6 +159,47 @@ func (s SchemaNode) Children() (SchemaList, error) {
 	return SchemaList{}, nil
 }
 
+type ProcessFn func(dataPointer *DataPointer, action SchemaAction) (data Data, err error)
+
+// ParentSchema is a SchemaType type nested inside one or more schemas in a wrapped []*SchemaNode (SchemaList)
+// the implementation must return all the *SchemaNode direct children
+type ParentSchema interface {
+	SchemaType
+	// Children return all direct Children of the *SchemaNode as the original SchemaMap
+	Children() SchemaList
+}
+
+type O map[string]SchemaType
+type L []SchemaType
+
+func (o O) SchemaMap() SchemaMap {
+	m := SchemaMap{}
+	for k, v := range o {
+		if v != nil {
+			m[k] = Schema(v)
+		} else {
+			m[k] = nil
+		}
+	}
+
+	return m
+}
+func (l L) SchemaList() SchemaList {
+	list := SchemaList{}
+	for _, v := range l {
+		if v != nil {
+			list = append(list, Schema(v))
+		} else {
+			list = append(list, nil)
+		}
+	}
+
+	return list
+}
+
+type SchemaMap map[string]*SchemaNode
+type SchemaList []*SchemaNode
+
 func (m SchemaMap) Children() SchemaList {
 	list := SchemaList{}
 	for _, v := range m {
@@ -227,4 +243,48 @@ func (m *Metadata) Set(key string, value string) *Metadata {
 	(*m)[key] = value
 
 	return m
+}
+
+// CustomSchemaTypeID is a SchemaType with a custom SchemaTypeID
+// implementation should return a constant string
+type CustomSchemaTypeID interface {
+	SchemaType
+
+	SchemaTypeID() string
+}
+
+func SchemaTypeID(s SchemaType) string {
+	// we must remove the first char of type, which is always a `*`
+	// since SchemaType is an interface
+
+	if customSchemaTypeID, ok := s.(CustomSchemaTypeID); ok {
+		return customSchemaTypeID.SchemaTypeID()
+	}
+
+	return reflect.TypeOf(s).String()[1:]
+}
+
+type SchemaAction string
+
+const (
+	SchemaActionParse     SchemaAction = "PARSE"
+	SchemaActionSerialize SchemaAction = "SERIALIZE"
+)
+
+// Parse is wrapper for SchemaNode.Parse that automatically
+// transforms Data into a DataPointer
+func Parse(schema SchemaType, data Data) (Data, error) {
+	return Process(schema, SchemaActionParse, data)
+}
+
+// Serialize is wrapper for SchemaNode.Serialize that automatically
+// transforms Data into a DataPointer
+func Serialize(schema SchemaType, data Data) (Data, error) {
+	return Process(schema, SchemaActionSerialize, data)
+}
+
+// Process is wrapper for SchemaNode.Process that automatically
+// transforms Data into a DataPointer
+func Process(schema SchemaType, action SchemaAction, data Data) (Data, error) {
+	return schema.Process(action, NewDataPointer(data, schema))
 }

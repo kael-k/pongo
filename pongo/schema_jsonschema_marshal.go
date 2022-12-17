@@ -7,6 +7,13 @@ import (
 
 const jsonSchemaDraft07Schema string = "http://json-schema.org/draft-07/schema#"
 
+// JSONSchemaMarshaler is a SchemaType which can be marshaled into a jsonschema
+type JSONSchemaMarshaler interface {
+	SchemaType
+
+	MarshalJSONSchema(action SchemaAction) ([]byte, error)
+}
+
 func MarshalJSONSchemaWithMetadata(schema *SchemaNode, action SchemaAction) ([]byte, error) {
 	var jsonObject map[string]json.RawMessage
 	var metadata = schema.Metadata

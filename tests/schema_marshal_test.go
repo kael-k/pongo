@@ -22,7 +22,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 		}
 
 		// test unmarshalling
-		schema, metadata, err := pongo.UnmarshalSchemaJSONWithMapper(jsonSchema, schemaType.typeMap)
+		schema, metadata, err := pongo.UnmarshalSchemaWithMapper(jsonSchema, schemaType.typeMap)
 		if err != nil {
 			t.Errorf("error test schema unmarshall %s, error on unmarshall JSON: %s", testID, err)
 			continue
@@ -33,7 +33,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 		}
 
 		// test marshalling
-		testJSONSchema, err := pongo.MarshalSchemaJSONWithMetadata(schemaType.wantSchema, metadata)
+		testJSONSchema, err := pongo.MarshalPongoSchemaWithMetadata(schemaType.wantSchema, metadata)
 		if err != nil {
 			t.Errorf("error test schema schemas %s, error on schemas BaseSchemaType: %s", testID, err)
 			continue

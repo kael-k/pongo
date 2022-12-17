@@ -22,7 +22,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 		}
 
 		// test unmarshalling
-		schema, metadata, err := pongo.UnmarshalSchemaWithMapper(jsonSchema, schemaType.typeMap)
+		schema, metadata, err := pongo.UnmarshalPongoSchemaWithMapper(jsonSchema, schemaType.typeMap)
 		if err != nil {
 			t.Errorf("error test schema unmarshall %s, error on unmarshall JSON: %s", testID, err)
 			continue

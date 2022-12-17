@@ -14,7 +14,7 @@ In SchemaType implementation, if is requested any SchemaType nesting, the implem
   In this way, the SchemaType implementation is not responsible for the marshaling process
 * if a SchemaType has any child, it MUST implement also ObjectSchema (if it has SchemaMap children),
   ParentSchema (for SchemaList children) or ParentSchema (if it has a single SchemaNode child). The implementation
-  is required for the unmarshalling process to recursively pass the SchemaUnmarshalMapper and resolve the correct
+  is required for the unmarshalling process to recursively pass the PongoSchemaUnmarshalMap and resolve the correct
   SchemaType to unmarshal
 */
 
@@ -95,7 +95,7 @@ func (s *SchemaNode) UnmarshalJSON(jsonSchema []byte) error {
 	return nil
 }
 
-func (s *SchemaNode) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
+func (s *SchemaNode) unmarshalRawJSON(mapper *PongoSchemaUnmarshalMap) (err error) {
 	defer s.cleanRawJSON()
 	var unmarshal marshalSchemaType
 
@@ -113,7 +113,7 @@ func (s *SchemaNode) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error)
 
 	schemaType := mapper.Get(*unmarshal.Type)
 	if schemaType == nil {
-		return fmt.Errorf("cannot unmarshall SchemaType element: SchemaType ID %s not found in SchemaUnmarshalMapper", *unmarshal.Type)
+		return fmt.Errorf("cannot unmarshall SchemaType element: SchemaType ID %s not found in PongoSchemaUnmarshalMap", *unmarshal.Type)
 	}
 
 	if unmarshal.Body != nil {

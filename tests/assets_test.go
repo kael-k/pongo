@@ -26,11 +26,11 @@ const testJSONSchemaFilename = "jsonschema.json"
 type testSchemaMarshall struct {
 	dir        string
 	wantSchema pongo.SchemaType
-	typeMap    *pongo.SchemaUnmarshalMapper
+	typeMap    *pongo.PongoSchemaUnmarshalMap
 }
 
-func DecoratedSchemaUnmarshalMapper() *pongo.SchemaUnmarshalMapper {
-	return pongo.GlobalSchemaUnmarshalMap().
+func DecoratedSchemaUnmarshalMapper() *pongo.PongoSchemaUnmarshalMap {
+	return pongo.GlobalPongoSchemaUnmarshalMap().
 		Set(func() pongo.SchemaType { return pongo.Decorate(pongo.Int()) })
 }
 
@@ -44,7 +44,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			"aBytes":  pongo.Bytes().SetCast(true),
 			"aDouble": pongo.Float64().SetMin(1).SetCast(true),
 		}),
-		pongo.GlobalSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMap(),
 	},
 	"example-2": {
 		"example-2",
@@ -55,7 +55,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 				"aBool":   pongo.Bool(),
 			}),
 		}),
-		pongo.GlobalSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMap(),
 	},
 	"example-3": {
 		"example-3",
@@ -69,7 +69,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 				pongo.String(),
 			)).SetMinLen(1).SetMaxLen(3),
 		}).Require("aList"),
-		pongo.GlobalSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMap(),
 	},
 	"example-4": {
 		"example-4",
@@ -78,7 +78,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			"aDatetime":           pongo.Datetime().SetCast(true).SetBefore(time.Unix(1754038800, 0).UTC()).SetAfter(time.Unix(1596272400, 0).UTC()),
 			"aUncastableDatetime": pongo.Datetime().SetAfter(time.Unix(1817110800, 0).UTC()),
 		}).Require("aString", "aDatetime"),
-		pongo.GlobalSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMap(),
 	},
 	"example-5": {
 		"example-5",
@@ -86,7 +86,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			pongo.Float64().SetMin(500).SetMax(500000),
 			pongo.String().SetCast(true).SetMaxLen(5),
 		).SetChain(true),
-		pongo.GlobalSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMap(),
 	},
 	"example-1_decorator": {
 		"example-1",

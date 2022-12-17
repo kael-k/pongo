@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -76,4 +77,31 @@ func (o ObjectType) Require(requires ...string) *ObjectType {
 
 func (o *ObjectType) SchemaTypeID() string {
 	return "object"
+}
+
+func (o ObjectType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	var childrenJSON = map[string]json.RawMessage{}
+
+	for key, child := range o.SchemaMap {
+		j, err := MarshalJSONSchema(child, action)
+		if err != nil {
+			return nil, err
+		}
+		if j == nil {
+			continue
+		}
+		childrenJSON[key] = j
+	}
+
+	jsonObject := map[string]interface{}{
+		"properties":           childrenJSON,
+		"additionalProperties": false,
+		"type":                 "object",
+	}
+
+	if len(o.Required) > 0 {
+		jsonObject["required"] = o.Required
+	}
+
+	return json.Marshal(jsonObject)
 }

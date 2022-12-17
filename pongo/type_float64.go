@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -94,4 +95,33 @@ func (f64 Float64Type) SetMax(f float64) *Float64Type {
 
 func (f64 *Float64Type) SchemaTypeID() string {
 	return "float64"
+}
+
+func (f64 Float64Type) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(f64, action)
+	}
+
+	var jsonObject = map[string]interface{}{"type": "number"}
+
+	if l, ok := f64.Min.Get(); ok {
+		jsonObject["minimum"] = l
+	}
+	if l, ok := f64.Max.Get(); ok {
+		jsonObject["maximum"] = l
+	}
+
+	if !f64.Cast.GetAction(action) {
+		return json.Marshal(jsonObject)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"oneOf": []map[string]interface{}{
+			jsonObject,
+			{
+				"type":    "string",
+				"pattern": "^-?([0-9]+)(.[0-9]+)?$",
+			},
+		},
+	})
 }

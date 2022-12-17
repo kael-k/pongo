@@ -6,9 +6,10 @@
       "chain": true,
       "elements": [
         {
-          "$type": "int",
+          "$type": "float64",
           "$body": {
-            "min": 500
+            "min": 500,
+            "max": 500000
           }
         },
         {

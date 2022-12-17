@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -99,4 +100,34 @@ func (i IntType) SetMax(n int) *IntType {
 
 func (i *IntType) SchemaTypeID() string {
 	return "int"
+}
+
+func (i IntType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if action != SchemaActionParse && action != SchemaActionSerialize {
+		return nil, ErrInvalidAction(i, action)
+	}
+
+	var jsonObject = map[string]interface{}{"type": "number"}
+
+	if l, ok := i.Min.Get(); ok {
+		jsonObject["minimum"] = l
+	}
+	if l, ok := i.Max.Get(); ok {
+		jsonObject["maximum"] = l
+	}
+
+	if !i.Cast.GetAction(action) {
+		jsonObject["type"] = "integer"
+		return json.Marshal(jsonObject)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"oneOf": []map[string]interface{}{
+			jsonObject,
+			{
+				"type":    "string",
+				"pattern": "^-?([0-9]+)$",
+			},
+		},
+	})
 }

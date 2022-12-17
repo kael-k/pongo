@@ -1,6 +1,7 @@
 package pongo
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -16,7 +17,7 @@ func Datetime() *DatetimeType {
 	return &DatetimeType{}
 }
 
-func (d *DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
+func (d DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error) {
 	var t time.Time
 	var ok bool
 
@@ -33,6 +34,10 @@ func (d *DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (d
 			t = time.Unix(int64(r), 0)
 		case int64:
 			t = time.Unix(r, 0)
+		case float64:
+			t = time.Unix(int64(r), 0)
+		case float32:
+			t = time.Unix(int64(r), 0)
 		case time.Time:
 			t = r
 		default:
@@ -109,4 +114,19 @@ func (d *DatetimeType) SetAfter(f time.Time) *DatetimeType {
 
 func (d *DatetimeType) SchemaTypeID() string {
 	return "datetime"
+}
+
+func (d DatetimeType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	if !d.Cast.GetAction(action) {
+		return nil, fmt.Errorf("%w: Cast must be enabled in order to JSONschema-marshal the type", ErrSchemaNotJSONSchemaMarshalable)
+	}
+
+	if action != SchemaActionParse {
+		return nil, ErrInvalidAction(d, action)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"type":   "string",
+		"format": "date-time",
+	})
 }

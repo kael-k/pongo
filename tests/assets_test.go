@@ -5,9 +5,11 @@ package tests
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
+	"reflect"
 	"syscall"
 	"testing"
 	"time"
@@ -81,7 +83,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 	"example-5": {
 		"example-5",
 		pongo.AllOf(
-			pongo.Int().SetMin(500),
+			pongo.Float64().SetMin(500).SetMax(500000),
 			pongo.String().SetCast(true).SetMaxLen(5),
 		).SetChain(true),
 		pongo.DefaultSchemaUnmarshalMap(),
@@ -102,8 +104,16 @@ func (t testSchemaMarshall) TestDirPath() string {
 	return fmt.Sprintf("%s/%s", testRootSchemas, t.dir)
 }
 
-func (t testSchemaMarshall) GetJSONSchema() (gojsonschema.JSONLoader, error) {
+func (t testSchemaMarshall) GetRawJSONSchema() ([]byte, error) {
 	rawJSONSchema, err := os.ReadFile(fmt.Sprintf("%s/%s", t.TestDirPath(), testJSONSchemaFilename))
+	if err != nil {
+		return nil, err
+	}
+	return rawJSONSchema, nil
+}
+
+func (t testSchemaMarshall) GetJSONSchema() (gojsonschema.JSONLoader, error) {
+	rawJSONSchema, err := t.GetRawJSONSchema()
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +194,46 @@ func (t testSchemaMarshall) validateDirectoryFiles() error {
 	return nil
 }
 
+func (t testSchemaMarshall) ValidateJSONSchemaMarshal() error {
+	pongoSchema, _, err := t.GetPongoSchema()
+	if err != nil {
+		return err
+	}
+	testMarshalJSONSchema, err := pongo.MarshalJSONSchemaWithMetadata(pongoSchema, pongo.SchemaActionParse)
+	if err != nil {
+		if errors.Is(err, pongo.ErrSchemaNotJSONSchemaMarshalable) {
+			return nil
+		}
+		return err
+	}
+
+	var wantMarshalJSONSchemaObj, testMarshalJSONSchemaObj map[string]interface{}
+	wantMarshalJSONSchema, err := t.GetRawJSONSchema()
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(wantMarshalJSONSchema, &wantMarshalJSONSchemaObj)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(testMarshalJSONSchema, &testMarshalJSONSchemaObj)
+	if err != nil {
+		return err
+	}
+
+	if !reflect.DeepEqual(testMarshalJSONSchemaObj, wantMarshalJSONSchemaObj) {
+		return fmt.Errorf(
+			"cannot validate Pongo schema jsonschema marshaling for test %s/%s.\nExpected: %v\nGot: %v",
+			t.TestDirPath(),
+			t.dir,
+			testMarshalJSONSchemaObj,
+			wantMarshalJSONSchemaObj,
+		)
+	}
+
+	return nil
+}
+
 func (t testSchemaMarshall) Validate() error {
 	if err := t.validateDirectoryFiles(); err != nil {
 		return err
@@ -200,6 +250,11 @@ func (t testSchemaMarshall) Validate() error {
 	}
 
 	okTestFiles, koTestFiles, err := t.GetTestCaseFiles()
+	if err != nil {
+		return err
+	}
+
+	err = t.ValidateJSONSchemaMarshal()
 	if err != nil {
 		return err
 	}
@@ -277,6 +332,10 @@ func TestAssetsIntegrity(t *testing.T) {
 		return
 	}
 
+	if len(testsDir) == 0 {
+		t.Errorf("cannot find tests file in %s", testRootSchemas)
+	}
+
 	for _, testDir := range testsDir {
 		dirName := testDir.Name()
 
@@ -287,11 +346,11 @@ func TestAssetsIntegrity(t *testing.T) {
 			// check if is not README.md and the error is actually because it is a file
 			pathErr, ok := err.(*fs.PathError)
 			if ok && pathErr.Err == syscall.ENOTDIR && dirName == "README.md" {
-				return
+				continue
 			}
 
 			t.Errorf("cannot read %s: %s", testPath, err)
-			return
+			continue
 		}
 
 		testCase, ok := testsSchemaMarshall[dirName]

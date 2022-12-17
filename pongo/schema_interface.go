@@ -27,6 +27,13 @@ type ParentSchema interface {
 	Children() SchemaList
 }
 
+// JSONSchemaMarshaler is a SchemaType which can be marshaled into a jsonschema
+type JSONSchemaMarshaler interface {
+	SchemaType
+
+	MarshalJSONSchema(action SchemaAction) ([]byte, error)
+}
+
 func SchemaTypeID(s SchemaType) string {
 	// we must remove the first char of type, which is always a `*`
 	// since SchemaType is an interface

@@ -1,14 +1,17 @@
 package pongo
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 )
 
 var ErrNoSchemaTypeSet = fmt.Errorf("this SchemaNode has no valid SchemaType set")
+var ErrSchemaNotJSONSchemaMarshalable = errors.New("this SchemaType is not JSONSchema marshalable")
 
 func ErrInvalidAction(schemaType SchemaType, action SchemaAction) error {
-	return fmt.Errorf("cannot execute schema action %s on schema type %v", action, schemaType)
+	return fmt.Errorf("cannot execute schema action %s on schema type %s", action, reflect.TypeOf(schemaType).Name())
 }
 
 type SchemaError struct {
@@ -55,12 +58,12 @@ func (s SchemaElementError) Error() error {
 }
 
 func (s SchemaError) Error() string {
-	var errors []string
+	var errs []string
 	for _, v := range s.Errors {
-		errors = append(errors, fmt.Sprintf("path: %s, pathData: %#v, error: %s", v.path, v.path.Value(), v.err))
+		errs = append(errs, fmt.Sprintf("path: %s, pathData: %#v, error: %s", v.path, v.path.Value(), v.err))
 	}
 
-	return fmt.Sprintf("the schema encountered the followed error(s) = [%s]", strings.Join(errors, "; "))
+	return fmt.Sprintf("the schema encountered the followed error(s) = [%s]", strings.Join(errs, "; "))
 }
 
 func (s SchemaError) Append(path Path, err error) *SchemaError {

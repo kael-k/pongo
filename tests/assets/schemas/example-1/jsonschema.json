@@ -1,25 +1,38 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "jsonschema.json",
-  "title": "test schema for PonGO Schema",
-  "description": "test schema for PonGO Schema",
   "type": "object",
-  "additionalItems": false,
+  "additionalProperties": false,
   "properties": {
     "aInt": {
-      "type": "number",
-      "multipleOf": 1,
-      "minimum": 10
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 10
+        },
+        {
+          "pattern": "^-?([0-9]+)$",
+          "type": "string"
+        }
+      ]
     },
     "aString": {
       "type": "string"
     },
     "aBytes": {
-      "type": "string"
+      "type": "string",
+      "contentEncoding": "base64"
     },
     "aDouble": {
-      "type": "number",
-      "minimum": 1
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 1
+        },
+        {
+          "pattern": "^-?([0-9]+)(.[0-9]+)?$",
+          "type": "string"
+        }
+      ]
     }
   }
 }

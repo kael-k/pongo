@@ -1,6 +1,9 @@
 package pongo
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // OneOfType SchemaType expose a Process method which run the given SchemaAction on all SchemaNode(s)
 // from the SchemaType list given at construction time, exactly one schema must process with no error
@@ -44,4 +47,23 @@ func (e OneOfType) Process(action SchemaAction, data *DataPointer) (processedDat
 
 func (e OneOfType) SchemaTypeID() string {
 	return "oneOf"
+}
+
+func (e OneOfType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
+	var childrenJSON []json.RawMessage
+
+	for _, child := range e.Children() {
+		j, err := MarshalJSONSchema(child, action)
+		if err != nil {
+			return nil, err
+		}
+		if j == nil {
+			continue
+		}
+		childrenJSON = append(childrenJSON, j)
+	}
+
+	return json.Marshal(map[string]interface{}{
+		"oneOf": childrenJSON,
+	})
 }

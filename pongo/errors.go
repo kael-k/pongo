@@ -7,11 +7,12 @@ import (
 	"strings"
 )
 
-var ErrNoSchemaTypeSet = fmt.Errorf("this SchemaNode has no valid SchemaType set")
+var ErrNoSchemaTypeSet = errors.New("this SchemaNode has no valid SchemaType set")
 var ErrSchemaNotJSONSchemaMarshalable = errors.New("this SchemaType is not JSONSchema marshalable")
+var ErrInvalidAction = errors.New("cannot execute schema action")
 
-func ErrInvalidAction(schemaType SchemaType, action SchemaAction) error {
-	return fmt.Errorf("cannot execute schema action %s on schema type %s", action, reflect.TypeOf(schemaType).Name())
+func NewErrInvalidAction(schemaType SchemaType, action SchemaAction) error {
+	return fmt.Errorf("%w %s on schema type %s", ErrInvalidAction, action, reflect.TypeOf(schemaType).Name())
 }
 
 type SchemaError struct {

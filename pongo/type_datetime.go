@@ -65,7 +65,7 @@ func (d DatetimeType) Process(action SchemaAction, dataPointer *DataPointer) (da
 		return t, nil
 	}
 
-	return nil, NewSchemaErrorWithError(dataPointer.Path(), ErrInvalidAction(d, action))
+	return nil, NewSchemaErrorWithError(dataPointer.Path(), NewErrInvalidAction(d, action))
 }
 
 func (d *DatetimeType) SetFormat(f string) *DatetimeType {
@@ -122,7 +122,7 @@ func (d DatetimeType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	}
 
 	if action != SchemaActionParse {
-		return nil, ErrInvalidAction(d, action)
+		return nil, NewErrInvalidAction(d, action)
 	}
 
 	return json.Marshal(map[string]interface{}{

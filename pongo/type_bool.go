@@ -54,7 +54,7 @@ func (b BoolType) Process(action SchemaAction, data *DataPointer) (Data, error) 
 		return parsedBool, nil
 	}
 
-	return nil, NewSchemaErrorWithError(data.Path(), ErrInvalidAction(b, action))
+	return nil, NewSchemaErrorWithError(data.Path(), NewErrInvalidAction(b, action))
 }
 
 func (b *BoolType) SetCast(cast bool) *BoolType {
@@ -78,7 +78,7 @@ func (b *BoolType) SchemaTypeID() string {
 
 func (b BoolType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(b, action)
+		return nil, NewErrInvalidAction(b, action)
 	}
 
 	var jsonObject = map[string]interface{}{"type": "boolean"}

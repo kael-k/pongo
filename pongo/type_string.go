@@ -85,7 +85,7 @@ func (s *StringType) SchemaTypeID() string {
 
 func (s StringType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(s, action)
+		return nil, NewErrInvalidAction(s, action)
 	}
 
 	var jsonObject = map[string]interface{}{"type": "string"}

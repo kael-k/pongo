@@ -27,10 +27,10 @@ type marshalSchemaType struct {
 }
 
 func UnmarshalPongoSchema(jsonSchema []byte) (schema *SchemaNode, metadata *Metadata, err error) {
-	return UnmarshalPongoSchemaWithMapper(jsonSchema, GlobalPongoSchemaUnmarshalMap())
+	return UnmarshalPongoSchemaWithMapper(jsonSchema, GlobalPongoSchemaUnmarshalMapper())
 }
 
-func UnmarshalPongoSchemaWithMapper(jsonSchema []byte, mapper *PongoSchemaUnmarshalMap) (schema *SchemaNode, metadata *Metadata, err error) {
+func UnmarshalPongoSchemaWithMapper(jsonSchema []byte, mapper *PongoSchemaUnmarshalMapper) (schema *SchemaNode, metadata *Metadata, err error) {
 	var root *map[string]json.RawMessage
 
 	err = json.Unmarshal(jsonSchema, &root)
@@ -69,21 +69,21 @@ func UnmarshalPongoSchemaWithMapper(jsonSchema []byte, mapper *PongoSchemaUnmars
 
 type SchemaFactory func() SchemaType
 
-type PongoSchemaUnmarshalMap struct { // revive:disable-line
+type PongoSchemaUnmarshalMapper struct { // revive:disable-line
 	schemaElementsMap map[string]SchemaFactory
 }
 
-func NewPongoSchemaUnmarshalMap() *PongoSchemaUnmarshalMap {
-	return &PongoSchemaUnmarshalMap{
+func NewPongoSchemaUnmarshalMapper() *PongoSchemaUnmarshalMapper {
+	return &PongoSchemaUnmarshalMapper{
 		map[string]SchemaFactory{},
 	}
 }
 
-func (p PongoSchemaUnmarshalMap) SchemaElements() map[string]SchemaFactory {
+func (p PongoSchemaUnmarshalMapper) SchemaElements() map[string]SchemaFactory {
 	return p.schemaElementsMap
 }
 
-func (p PongoSchemaUnmarshalMap) Get(schemaElementID string) SchemaType {
+func (p PongoSchemaUnmarshalMapper) Get(schemaElementID string) SchemaType {
 	schemaType, ok := p.schemaElementsMap[schemaElementID]
 	if !ok {
 		return nil
@@ -91,15 +91,15 @@ func (p PongoSchemaUnmarshalMap) Get(schemaElementID string) SchemaType {
 	return schemaType()
 }
 
-func (p PongoSchemaUnmarshalMap) Set(schema SchemaFactory) *PongoSchemaUnmarshalMap {
+func (p PongoSchemaUnmarshalMapper) Set(schema SchemaFactory) *PongoSchemaUnmarshalMapper {
 	id := SchemaTypeID(schema())
 	p.schemaElementsMap[id] = schema
 
 	return &p
 }
 
-func (p PongoSchemaUnmarshalMap) Clone() *PongoSchemaUnmarshalMap {
-	cloneMapper := NewPongoSchemaUnmarshalMap()
+func (p PongoSchemaUnmarshalMapper) Clone() *PongoSchemaUnmarshalMapper {
+	cloneMapper := NewPongoSchemaUnmarshalMapper()
 	for key, el := range p.schemaElementsMap {
 		cloneMapper.schemaElementsMap[key] = el
 	}
@@ -107,7 +107,7 @@ func (p PongoSchemaUnmarshalMap) Clone() *PongoSchemaUnmarshalMap {
 	return cloneMapper
 }
 
-var globalPongoSchemaUnmarshalMapper = &PongoSchemaUnmarshalMap{
+var globalPongoSchemaUnmarshalMapper = &PongoSchemaUnmarshalMapper{
 	map[string]SchemaFactory{
 		"anyOf":    func() SchemaType { return AnyOf(nil) },
 		"oneOf":    func() SchemaType { return OneOf(nil) },
@@ -123,10 +123,10 @@ var globalPongoSchemaUnmarshalMapper = &PongoSchemaUnmarshalMap{
 	},
 }
 
-func GlobalPongoSchemaUnmarshalMap() *PongoSchemaUnmarshalMap {
+func GlobalPongoSchemaUnmarshalMapper() *PongoSchemaUnmarshalMapper {
 	return globalPongoSchemaUnmarshalMapper.Clone()
 }
 
-func SetGlobalPongoSchemaUnmarshalMap(newGlobalMap *PongoSchemaUnmarshalMap) {
-	globalPongoSchemaUnmarshalMapper = newGlobalMap
+func SetGlobalPongoSchemaUnmarshalMapper(newGlobalMapper *PongoSchemaUnmarshalMapper) {
+	globalPongoSchemaUnmarshalMapper = newGlobalMapper
 }

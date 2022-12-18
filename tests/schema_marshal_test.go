@@ -82,16 +82,16 @@ func TestSchemaTypeID(t *testing.T) {
 func TestSetGlobalPongoSchemaUnmarshalMap(t *testing.T) {
 	// read the warning above, do not alter this first two lines
 	// nor the oldGlobalMap variable
-	oldGlobalMap := pongo.GlobalPongoSchemaUnmarshalMap()
-	defer pongo.SetGlobalPongoSchemaUnmarshalMap(oldGlobalMap)
+	oldGlobalMap := pongo.GlobalPongoSchemaUnmarshalMapper()
+	defer pongo.SetGlobalPongoSchemaUnmarshalMapper(oldGlobalMap)
 
-	newGlobalMap := pongo.NewPongoSchemaUnmarshalMap()
+	newGlobalMap := pongo.NewPongoSchemaUnmarshalMapper()
 
 	newGlobalMap.Set(func() pongo.SchemaType { return pongo.Int() })
 	newGlobalMap.Set(func() pongo.SchemaType { return pongo.String() })
 	newGlobalMap.Set(func() pongo.SchemaType { return pongo.Object(nil) })
 
-	pongo.SetGlobalPongoSchemaUnmarshalMap(newGlobalMap)
+	pongo.SetGlobalPongoSchemaUnmarshalMapper(newGlobalMap)
 
 	okTest, err := pongo.MarshalPongoSchema(pongo.Object(pongo.O{
 		"aInt":    pongo.Int(),

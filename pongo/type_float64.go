@@ -41,7 +41,7 @@ func (f64 Float64Type) Process(action SchemaAction, dataPointer *DataPointer) (d
 	var n float64
 
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(f64, action)
+		return nil, NewErrInvalidAction(f64, action)
 	}
 
 	if !f64.Cast.GetAction(action) {
@@ -99,7 +99,7 @@ func (f64 *Float64Type) SchemaTypeID() string {
 
 func (f64 Float64Type) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(f64, action)
+		return nil, NewErrInvalidAction(f64, action)
 	}
 
 	var jsonObject = map[string]interface{}{"type": "number"}

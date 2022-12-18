@@ -34,7 +34,7 @@ func TestBrokenPongoSchemas(t *testing.T) {
 			return
 		}
 
-		_, _, err = pongo.UnmarshalSchemaJSON(rawPonGOJSONSchema)
+		_, _, err = pongo.UnmarshalPongoSchema(rawPonGOJSONSchema)
 		if err == nil {
 			t.Errorf("expected error on path %s, got no error", path)
 		}

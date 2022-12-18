@@ -255,7 +255,7 @@ schema = pongo.Object(pongo.O{
     "aInt":    pongo.Int(),
     "aString": pongo.String(),
 })
-marshalledSchema, err := pongo.MarshalSchemaJSON(schema)
+marshalledSchema, err := pongo.MarshalPongoSchema(schema)
 if err != nil {
     panic("unexpected error during marshalling: " + err.Error())
 } else {
@@ -272,7 +272,7 @@ marshalled schema:
 To unmarshall back the schema
 
 ```go
-newSchema, _, err := pongo.UnmarshalSchemaJSON(marshalledSchema)
+newSchema, _, err := pongo.UnmarshalPongoSchema(marshalledSchema)
 if err != nil {
     panic("unexpected error during unmarshalling: " + err.Error())
 } else {
@@ -299,10 +299,10 @@ In order to create a valid "type" for the pongo library, you need to implement a
 If your schema contains nested `SchemaType`(s) (such as `ListType`, `ObjectType`, `AllOfType`) you must implement `ParentSchema` 
 which return a list of the nested `SchemaNode`(s). This implementation is required to correctly marshal/unmarshal the `Schema`(s).
 
-If you need to unmarshal your custom type, you'll also need to use a custom `SchemaUnmarshalMapper` which contains your custom type.
+If you need to unmarshal your custom type, you'll also need to use a custom `PongoSchemaUnmarshalMapper` which contains your custom type.
 When you'll unmarshal your PonGO schema, you must pass to the unmarshal function your custom map
 
 ```go
-myCustomMapper = pongo.DefaultSchemaUnmarshalMap().set()
-myPonGOSchema, err := pongo.UnmarshalSchemaJSONWithMapper(myPonGOSchemaJSON, myCustomMapper)
+myCustomMapper = pongo.GlobalPongoSchemaUnmarshalMapper().set()
+myPonGOSchema, err := pongo.UnmarshalPongoSchemaWithMapper(myPonGOSchemaJSON, myCustomMapper)
 ```

@@ -26,11 +26,11 @@ const testJSONSchemaFilename = "jsonschema.json"
 type testSchemaMarshall struct {
 	dir        string
 	wantSchema pongo.SchemaType
-	typeMap    *pongo.SchemaUnmarshalMapper
+	typeMap    *pongo.PongoSchemaUnmarshalMapper
 }
 
-func DecoratedSchemaUnmarshalMapper() *pongo.SchemaUnmarshalMapper {
-	return pongo.DefaultSchemaUnmarshalMap().
+func DecoratedSchemaUnmarshalMapper() *pongo.PongoSchemaUnmarshalMapper {
+	return pongo.GlobalPongoSchemaUnmarshalMapper().
 		Set(func() pongo.SchemaType { return pongo.Decorate(pongo.Int()) })
 }
 
@@ -44,7 +44,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			"aBytes":  pongo.Bytes().SetCast(true),
 			"aDouble": pongo.Float64().SetMin(1).SetCast(true),
 		}),
-		pongo.DefaultSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMapper(),
 	},
 	"example-2": {
 		"example-2",
@@ -55,7 +55,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 				"aBool":   pongo.Bool(),
 			}),
 		}),
-		pongo.DefaultSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMapper(),
 	},
 	"example-3": {
 		"example-3",
@@ -69,7 +69,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 				pongo.String(),
 			)).SetMinLen(1).SetMaxLen(3),
 		}).Require("aList"),
-		pongo.DefaultSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMapper(),
 	},
 	"example-4": {
 		"example-4",
@@ -78,7 +78,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			"aDatetime":           pongo.Datetime().SetCast(true).SetBefore(time.Unix(1754038800, 0).UTC()).SetAfter(time.Unix(1596272400, 0).UTC()),
 			"aUncastableDatetime": pongo.Datetime().SetAfter(time.Unix(1817110800, 0).UTC()),
 		}).Require("aString", "aDatetime"),
-		pongo.DefaultSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMapper(),
 	},
 	"example-5": {
 		"example-5",
@@ -86,7 +86,7 @@ var testsSchemaMarshall = map[string]testSchemaMarshall{
 			pongo.Float64().SetMin(500).SetMax(500000),
 			pongo.String().SetCast(true).SetMaxLen(5),
 		).SetChain(true),
-		pongo.DefaultSchemaUnmarshalMap(),
+		pongo.GlobalPongoSchemaUnmarshalMapper(),
 	},
 	"example-1_decorator": {
 		"example-1",
@@ -125,7 +125,7 @@ func (t testSchemaMarshall) GetPongoSchema() (*pongo.SchemaNode, *pongo.Metadata
 	if err != nil {
 		return nil, nil, err
 	}
-	schema, metadata, err := pongo.UnmarshalSchemaJSON(rawPongoSchema)
+	schema, metadata, err := pongo.UnmarshalPongoSchema(rawPongoSchema)
 	if err != nil {
 		return nil, nil, err
 	}

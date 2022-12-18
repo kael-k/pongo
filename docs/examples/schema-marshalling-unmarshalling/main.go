@@ -14,14 +14,14 @@ func main() {
 		"aInt":    pongo.Int(),
 		"aString": pongo.String(),
 	})
-	marshalledSchema, err := pongo.MarshalSchemaJSON(schema)
+	marshalledSchema, err := pongo.MarshalPongoSchema(schema)
 	if err != nil {
 		panic("unexpected error during marshalling: " + err.Error())
 	} else {
 		fmt.Printf("marshalled schema:\n%s\n", marshalledSchema)
 	}
 
-	newSchema, _, err := pongo.UnmarshalSchemaJSON(marshalledSchema)
+	newSchema, _, err := pongo.UnmarshalPongoSchema(marshalledSchema)
 	if err != nil {
 		panic("unexpected error during unmarshalling: " + err.Error())
 	} else {

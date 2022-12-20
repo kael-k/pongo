@@ -8,6 +8,11 @@ type Data interface{}
 // * root contains always the data structure as passed originally by the caller
 // * path contains the Path which contains the target SchemaNode has to process.
 //   - It also contains the stack all the Data passed across the current stack of SchemaNode
+//
+// Path works as a stack, which is needed to retrieve correct data to process in nested validations.
+// For example, take ObjectType: which for every element in a map[string]Data, it validates every element
+// with the SchemaType associated with the map key. The Data at the key of map[string]Data is then pushed
+// in the Path with Push and then the new DataPointer is passed to the child SchemaType
 type DataPointer struct {
 	root Data
 	path Path

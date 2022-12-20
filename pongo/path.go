@@ -5,6 +5,11 @@ import (
 	"fmt"
 )
 
+// PathElement represent an entry in the Path stack
+// a PathElement contains the Data contained in the element of Path stack
+// this data can be overridden with SetOverride
+// PathElement also contains a reference of the SchemaType which is pushing the path element
+// and optionally a key representing the element in the Path stack
 type PathElement struct {
 	key         string
 	data        Data
@@ -13,6 +18,7 @@ type PathElement struct {
 	schemaType  SchemaType
 }
 
+// NewPathElement is a constructor for PathElement
 func NewPathElement(key string, data Data, schemaType SchemaType) *PathElement {
 	return &PathElement{
 		key:         key,
@@ -47,6 +53,9 @@ func (e *PathElement) UnsetOverride() {
 
 const PathSeparator = "."
 
+// Path is a stack containing a slice of PathElement representing the Data processing stack
+// Path is used mainly in DataPointer, where Data are pushed in a stack when a SchemaType
+// contains nested validation.
 type Path struct {
 	elements []PathElement
 }

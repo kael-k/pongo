@@ -245,14 +245,16 @@ func (m *Metadata) Set(key string, value string) *Metadata {
 	return m
 }
 
-// CustomSchemaTypeID is a SchemaType with a custom SchemaTypeID
-// implementation should return a constant string
+// CustomSchemaTypeID interface allow to assign at a SchemaType a custom SchemaTypeID
+// the implementation should return a constant string representing the SchemaTypeID for the SchemaType
 type CustomSchemaTypeID interface {
 	SchemaType
 
 	SchemaTypeID() string
 }
 
+// SchemaTypeID generate a string that identify the s SchemaType.
+// This string is used, for example, for the Pongo Schema Marshaling
 func SchemaTypeID(s SchemaType) string {
 	// we must remove the first char of type, which is always a `*`
 	// since SchemaType is an interface

@@ -15,17 +15,17 @@ type PathElement struct {
 	data        Data
 	override    Data
 	hasOverride bool
-	schemaType  SchemaType
+	schemaNode  *SchemaNode
 }
 
 // NewPathElement is a constructor for PathElement
-func NewPathElement(key string, data Data, schemaType SchemaType) *PathElement {
+func NewPathElement(key string, data Data, schemaNode *SchemaNode) *PathElement {
 	return &PathElement{
 		key:         key,
 		data:        data,
 		override:    nil,
 		hasOverride: false,
-		schemaType:  schemaType,
+		schemaNode:  schemaNode,
 	}
 }
 
@@ -38,7 +38,7 @@ func (e PathElement) Data() Data {
 }
 
 func (e PathElement) Schema() SchemaType {
-	return e.schemaType
+	return e.schemaNode
 }
 
 func (e *PathElement) SetOverride(override Data) {
@@ -75,7 +75,7 @@ func (path Path) String() string {
 	var stringPath = ""
 
 	for _, pathElement := range path.elements {
-		schemaTypeID := SchemaTypeID(pathElement.schemaType)
+		schemaTypeID := SchemaTypeID(pathElement.schemaNode)
 		stringPath += fmt.Sprintf("%s%s<%s>", PathSeparator, pathElement.key, schemaTypeID)
 	}
 
@@ -140,8 +140,8 @@ func (path Path) Last() *PathElement {
 }
 
 // Push a new PathElement in Path
-func (path Path) Push(key string, data Data, schemaType SchemaType) *Path {
-	path.elements = append(path.elements, *NewPathElement(key, data, schemaType))
+func (path Path) Push(key string, data Data, schemaNode *SchemaNode) *Path {
+	path.elements = append(path.elements, *NewPathElement(key, data, schemaNode))
 
 	return &path
 }

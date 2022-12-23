@@ -16,8 +16,8 @@ func TestData(t *testing.T) {
 	}
 
 	s := pongo.String()
-	d = pongo.NewDataPointer(TestValue1, s)
-	d = d.Push("1", TestValue2, s)
+	d = pongo.NewDataPointer(TestValue1, pongo.Schema(s))
+	d = d.Push("1", TestValue2, pongo.Schema(s))
 
 	path := d.Path()
 	if v := path.Size(); v != 2 {
@@ -63,8 +63,8 @@ func TestData(t *testing.T) {
 	}
 
 	// testing variable override
-	d = d.Push("foo", "bar", pongo.String())
-	d2 := d.Push("foo", "baz", pongo.String())
+	d = d.Push("foo", "bar", pongo.Schema(pongo.String()))
+	d2 := d.Push("foo", "baz", pongo.Schema(pongo.String()))
 	if v := d2.Get(); v != "baz" {
 		t.Errorf("expected value baz, got: %v", v)
 	}

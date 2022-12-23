@@ -259,6 +259,9 @@ func SchemaTypeID(s SchemaType) string {
 	// we must remove the first char of type, which is always a `*`
 	// since SchemaType is an interface
 
+	if schemaNode, ok := s.(*SchemaNode); ok {
+		return SchemaTypeID(schemaNode.Type())
+	}
 	if customSchemaTypeID, ok := s.(CustomSchemaTypeID); ok {
 		return customSchemaTypeID.SchemaTypeID()
 	}
@@ -288,5 +291,9 @@ func Serialize(schema SchemaType, data Data) (Data, error) {
 // Process is wrapper for SchemaNode.Process that automatically
 // transforms Data into a DataPointer
 func Process(schema SchemaType, action SchemaAction, data Data) (Data, error) {
-	return schema.Process(action, NewDataPointer(data, schema))
+	schemaNode, ok := schema.(*SchemaNode)
+	if !ok {
+		schemaNode = Schema(schema)
+	}
+	return schema.Process(action, NewDataPointer(data, schemaNode))
 }

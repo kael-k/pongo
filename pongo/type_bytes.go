@@ -55,7 +55,7 @@ func (b BytesType) Process(action SchemaAction, dataPointer *DataPointer) (data 
 		return bytes, nil
 	}
 
-	return nil, ErrInvalidAction(b, action)
+	return nil, NewErrInvalidAction(b, action)
 }
 
 func (b BytesType) SetMinLen(i int) *BytesType {
@@ -89,7 +89,7 @@ func (b *BytesType) SchemaTypeID() string {
 
 func (b BytesType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	if action != SchemaActionParse {
-		return nil, ErrInvalidAction(b, action)
+		return nil, NewErrInvalidAction(b, action)
 	}
 
 	return json.Marshal(map[string]interface{}{

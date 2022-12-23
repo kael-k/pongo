@@ -22,7 +22,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 		}
 
 		// test unmarshalling
-		schema, metadata, err := pongo.UnmarshalSchemaJSONWithMapper(jsonSchema, schemaType.typeMap)
+		schema, metadata, err := pongo.UnmarshalPongoSchemaWithMapper(jsonSchema, schemaType.typeMap)
 		if err != nil {
 			t.Errorf("error test schema unmarshall %s, error on unmarshall JSON: %s", testID, err)
 			continue
@@ -33,7 +33,7 @@ func TestSchemasMarshallUnmarshall(t *testing.T) {
 		}
 
 		// test marshalling
-		testJSONSchema, err := pongo.MarshalSchemaJSONWithMetadata(schemaType.wantSchema, metadata)
+		testJSONSchema, err := pongo.MarshalPongoSchemaWithMetadata(schemaType.wantSchema, metadata)
 		if err != nil {
 			t.Errorf("error test schema schemas %s, error on schemas BaseSchemaType: %s", testID, err)
 			continue
@@ -73,5 +73,51 @@ func TestSchemaTypeID(t *testing.T) {
 	test = pongo.SchemaTypeID(pongo.String())
 	if test != "string" {
 		t.Errorf("error test SchemaTypeID() with testing.TestDummySchemaType, expected id $testing.TestDummySchemaType, got %s", test)
+	}
+}
+
+// WARNING: this function will test the global PonGO Schema unmarshal map
+// beware that altering the global map without restoring it, it might compromise
+// other tests execution
+func TestSetGlobalPongoSchemaUnmarshalMap(t *testing.T) {
+	// read the warning above, do not alter this first two lines
+	// nor the oldGlobalMap variable
+	oldGlobalMap := pongo.GlobalPongoSchemaUnmarshalMapper()
+	defer pongo.SetGlobalPongoSchemaUnmarshalMapper(oldGlobalMap)
+
+	newGlobalMap := pongo.NewPongoSchemaUnmarshalMapper()
+
+	newGlobalMap.Set(func() pongo.SchemaType { return pongo.Int() })
+	newGlobalMap.Set(func() pongo.SchemaType { return pongo.String() })
+	newGlobalMap.Set(func() pongo.SchemaType { return pongo.Object(nil) })
+
+	pongo.SetGlobalPongoSchemaUnmarshalMapper(newGlobalMap)
+
+	okTest, err := pongo.MarshalPongoSchema(pongo.Object(pongo.O{
+		"aInt":    pongo.Int(),
+		"aString": pongo.String(),
+	}))
+	if err != nil {
+		t.Errorf("unexpected PongoSchema marshal error")
+		return
+	}
+
+	koTest, err := pongo.MarshalPongoSchema(pongo.Object(pongo.O{
+		"aInt":   pongo.Int(),
+		"aFloat": pongo.Float64(),
+	}))
+	if err != nil {
+		t.Errorf("unexpected PongoSchema marshal error")
+		return
+	}
+
+	_, _, err = pongo.UnmarshalPongoSchema(okTest)
+	if err != nil {
+		t.Errorf("ok tests failed, no error expected, got: %s", err)
+	}
+
+	_, _, err = pongo.UnmarshalPongoSchema(koTest)
+	if err == nil {
+		t.Errorf("ok tests failed, error expected, got no one")
 	}
 }

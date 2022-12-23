@@ -3,6 +3,7 @@ package pongo
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 /* These types are used to wrap SchemaType instances.
@@ -13,40 +14,14 @@ In SchemaType implementation, if is requested any SchemaType nesting, the implem
   In this way, the SchemaType implementation is not responsible for the marshaling process
 * if a SchemaType has any child, it MUST implement also ObjectSchema (if it has SchemaMap children),
   ParentSchema (for SchemaList children) or ParentSchema (if it has a single SchemaNode child). The implementation
-  is required for the unmarshalling process to recursively pass the SchemaUnmarshalMapper and resolve the correct
+  is required for the unmarshalling process to recursively pass the PongoSchemaUnmarshalMapper and resolve the correct
   SchemaType to unmarshal
 */
 
-type O map[string]SchemaType
-type L []SchemaType
-
-func (o O) SchemaMap() SchemaMap {
-	m := SchemaMap{}
-	for k, v := range o {
-		if v != nil {
-			m[k] = Schema(v)
-		} else {
-			m[k] = nil
-		}
-	}
-
-	return m
+// SchemaType is SchemaNode type that expose a generic Process function
+type SchemaType interface {
+	Process(action SchemaAction, dataPointer *DataPointer) (data Data, err error)
 }
-func (l L) SchemaList() SchemaList {
-	list := SchemaList{}
-	for _, v := range l {
-		if v != nil {
-			list = append(list, Schema(v))
-		} else {
-			list = append(list, nil)
-		}
-	}
-
-	return list
-}
-
-type SchemaMap map[string]*SchemaNode
-type SchemaList []*SchemaNode
 
 type SchemaNode struct {
 	SchemaType
@@ -120,7 +95,7 @@ func (s *SchemaNode) UnmarshalJSON(jsonSchema []byte) error {
 	return nil
 }
 
-func (s *SchemaNode) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error) {
+func (s *SchemaNode) unmarshalRawJSON(mapper *PongoSchemaUnmarshalMapper) (err error) {
 	defer s.cleanRawJSON()
 	var unmarshal marshalSchemaType
 
@@ -138,7 +113,7 @@ func (s *SchemaNode) unmarshalRawJSON(mapper *SchemaUnmarshalMapper) (err error)
 
 	schemaType := mapper.Get(*unmarshal.Type)
 	if schemaType == nil {
-		return fmt.Errorf("cannot unmarshall SchemaType element: SchemaType ID %s not found in SchemaUnmarshalMapper", *unmarshal.Type)
+		return fmt.Errorf("cannot unmarshall SchemaType element: SchemaType ID %s not found in PongoSchemaUnmarshalMapper", *unmarshal.Type)
 	}
 
 	if unmarshal.Body != nil {
@@ -184,6 +159,47 @@ func (s SchemaNode) Children() (SchemaList, error) {
 	return SchemaList{}, nil
 }
 
+type ProcessFn func(dataPointer *DataPointer, action SchemaAction) (data Data, err error)
+
+// ParentSchema is a SchemaType type nested inside one or more schemas in a wrapped []*SchemaNode (SchemaList)
+// the implementation must return all the *SchemaNode direct children
+type ParentSchema interface {
+	SchemaType
+	// Children return all direct Children of the *SchemaNode as the original SchemaMap
+	Children() SchemaList
+}
+
+type O map[string]SchemaType
+type L []SchemaType
+
+func (o O) SchemaMap() SchemaMap {
+	m := SchemaMap{}
+	for k, v := range o {
+		if v != nil {
+			m[k] = Schema(v)
+		} else {
+			m[k] = nil
+		}
+	}
+
+	return m
+}
+func (l L) SchemaList() SchemaList {
+	list := SchemaList{}
+	for _, v := range l {
+		if v != nil {
+			list = append(list, Schema(v))
+		} else {
+			list = append(list, nil)
+		}
+	}
+
+	return list
+}
+
+type SchemaMap map[string]*SchemaNode
+type SchemaList []*SchemaNode
+
 func (m SchemaMap) Children() SchemaList {
 	list := SchemaList{}
 	for _, v := range m {
@@ -227,4 +243,57 @@ func (m *Metadata) Set(key string, value string) *Metadata {
 	(*m)[key] = value
 
 	return m
+}
+
+// CustomSchemaTypeID interface allow to assign at a SchemaType a custom SchemaTypeID
+// the implementation should return a constant string representing the SchemaTypeID for the SchemaType
+type CustomSchemaTypeID interface {
+	SchemaType
+
+	SchemaTypeID() string
+}
+
+// SchemaTypeID generate a string that identify the s SchemaType.
+// This string is used, for example, for the Pongo Schema Marshaling
+func SchemaTypeID(s SchemaType) string {
+	// we must remove the first char of type, which is always a `*`
+	// since SchemaType is an interface
+
+	if schemaNode, ok := s.(*SchemaNode); ok {
+		return SchemaTypeID(schemaNode.Type())
+	}
+	if customSchemaTypeID, ok := s.(CustomSchemaTypeID); ok {
+		return customSchemaTypeID.SchemaTypeID()
+	}
+
+	return reflect.TypeOf(s).String()[1:]
+}
+
+type SchemaAction string
+
+const (
+	SchemaActionParse     SchemaAction = "PARSE"
+	SchemaActionSerialize SchemaAction = "SERIALIZE"
+)
+
+// Parse is wrapper for SchemaNode.Parse that automatically
+// transforms Data into a DataPointer
+func Parse(schema SchemaType, data Data) (Data, error) {
+	return Process(schema, SchemaActionParse, data)
+}
+
+// Serialize is wrapper for SchemaNode.Serialize that automatically
+// transforms Data into a DataPointer
+func Serialize(schema SchemaType, data Data) (Data, error) {
+	return Process(schema, SchemaActionSerialize, data)
+}
+
+// Process is wrapper for SchemaNode.Process that automatically
+// transforms Data into a DataPointer
+func Process(schema SchemaType, action SchemaAction, data Data) (Data, error) {
+	schemaNode, ok := schema.(*SchemaNode)
+	if !ok {
+		schemaNode = Schema(schema)
+	}
+	return schema.Process(action, NewDataPointer(schemaNode, data))
 }

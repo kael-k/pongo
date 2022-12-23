@@ -43,7 +43,7 @@ func (l ListType) Process(action SchemaAction, dataPointer *DataPointer) (data D
 	var processedSlice = []interface{}{}
 
 	for key := range d {
-		ptr := dataPointer.Push(fmt.Sprintf("[%d]", key), d[key], &l)
+		ptr := dataPointer.Push(l.Type, d[key], fmt.Sprintf("[%d]", key))
 		var item interface{}
 
 		switch action {

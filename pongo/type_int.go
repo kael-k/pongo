@@ -47,7 +47,7 @@ func (i IntType) Process(action SchemaAction, dataPointer *DataPointer) (data Da
 	var n int
 
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(i, action)
+		return nil, NewErrInvalidAction(i, action)
 	}
 
 	if !i.Cast.GetAction(action) {
@@ -104,7 +104,7 @@ func (i *IntType) SchemaTypeID() string {
 
 func (i IntType) MarshalJSONSchema(action SchemaAction) ([]byte, error) {
 	if action != SchemaActionParse && action != SchemaActionSerialize {
-		return nil, ErrInvalidAction(i, action)
+		return nil, NewErrInvalidAction(i, action)
 	}
 
 	var jsonObject = map[string]interface{}{"type": "number"}

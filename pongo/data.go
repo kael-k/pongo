@@ -19,13 +19,13 @@ type DataPointer struct {
 }
 
 // NewDataPointer construct a DataPointer
-func NewDataPointer(data Data, schemaNode *SchemaNode) *DataPointer {
+func NewDataPointer(schemaNode *SchemaNode, data Data) *DataPointer {
 	dp := &DataPointer{
 		root: data,
 	}
 
 	if data != nil {
-		dp.path = *NewPath(*NewPathElement("", data, schemaNode))
+		dp.path = *NewPath(*NewPathElement(schemaNode, data, ""))
 	} else {
 		dp.path = *NewPath()
 	}
@@ -34,8 +34,8 @@ func NewDataPointer(data Data, schemaNode *SchemaNode) *DataPointer {
 }
 
 // Push a new entry in the DataPointer Path stack
-func (d DataPointer) Push(key string, data Data, schemaNode *SchemaNode) *DataPointer {
-	d.path = *d.path.Push(key, data, schemaNode)
+func (d DataPointer) Push(schemaNode *SchemaNode, data Data, key string) *DataPointer {
+	d.path = *d.path.Push(schemaNode, data, key)
 	return &d
 }
 

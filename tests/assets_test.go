@@ -270,7 +270,7 @@ func (t testSchemaMarshall) Validate() error {
 			return err
 		}
 
-		_, schemaErr := pongoSchema.Parse(pongo.NewDataPointer(d, pongoSchema))
+		_, schemaErr := pongoSchema.Parse(pongo.NewDataPointer(pongoSchema, d))
 		if schemaErr != nil {
 			return fmt.Errorf("cannot validate Pongo schema for ok test %s/%s: %w", t.dir, okFile, schemaErr)
 		}
@@ -295,7 +295,7 @@ func (t testSchemaMarshall) Validate() error {
 			return err
 		}
 
-		_, schemaErr := pongoSchema.Parse(pongo.NewDataPointer(d, pongoSchema))
+		_, schemaErr := pongoSchema.Parse(pongo.NewDataPointer(pongoSchema, d))
 		if schemaErr == nil {
 			return fmt.Errorf("cannot validate Pongo schema for ko test %s/%s: expected error, got no one", t.dir, koFile)
 		}

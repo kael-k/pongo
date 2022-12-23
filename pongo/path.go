@@ -19,7 +19,7 @@ type PathElement struct {
 }
 
 // NewPathElement is a constructor for PathElement
-func NewPathElement(key string, data Data, schemaNode *SchemaNode) *PathElement {
+func NewPathElement(schemaNode *SchemaNode, data Data, key string) *PathElement {
 	return &PathElement{
 		key:         key,
 		data:        data,
@@ -37,7 +37,7 @@ func (e PathElement) Data() Data {
 	return e.data
 }
 
-func (e PathElement) Schema() SchemaType {
+func (e PathElement) SchemaNode() *SchemaNode {
 	return e.schemaNode
 }
 
@@ -140,8 +140,8 @@ func (path Path) Last() *PathElement {
 }
 
 // Push a new PathElement in Path
-func (path Path) Push(key string, data Data, schemaNode *SchemaNode) *Path {
-	path.elements = append(path.elements, *NewPathElement(key, data, schemaNode))
+func (path Path) Push(schemaNode *SchemaNode, data Data, key string) *Path {
+	path.elements = append(path.elements, *NewPathElement(schemaNode, data, key))
 
 	return &path
 }

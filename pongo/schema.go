@@ -295,5 +295,5 @@ func Process(schema SchemaType, action SchemaAction, data Data) (Data, error) {
 	if !ok {
 		schemaNode = Schema(schema)
 	}
-	return schema.Process(action, NewDataPointer(data, schemaNode))
+	return schema.Process(action, NewDataPointer(schemaNode, data))
 }

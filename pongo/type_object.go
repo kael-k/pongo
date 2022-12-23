@@ -48,7 +48,7 @@ func (o ObjectType) Process(action SchemaAction, dataPointer *DataPointer) (data
 		}
 
 		// navigate the DataPointer
-		ptr := dataPointer.Push(key, d[key], schemaNode)
+		ptr := dataPointer.Push(schemaNode, d[key], key)
 
 		switch action {
 		case SchemaActionSerialize:

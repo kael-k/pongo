@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 var testObjectTypeCases = []testSchemaCase{

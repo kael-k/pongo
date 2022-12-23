@@ -1,4 +1,4 @@
-module github.com/kael-k/pongo
+module github.com/kael-k/pongo/v2
 
 go 1.19
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 func TestCastProperty(t *testing.T) {

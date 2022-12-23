@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 var testTypeListCases = []testSchemaCase{

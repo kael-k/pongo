@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 type testListDiffCase[T comparable] struct {

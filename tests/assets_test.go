@@ -16,7 +16,7 @@ import (
 
 	"github.com/xeipuuv/gojsonschema"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 const testRootSchemas = "../tests/assets/schemas"

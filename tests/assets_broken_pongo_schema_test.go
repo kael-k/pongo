@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kael-k/pongo/pongo"
+	"github.com/kael-k/pongo/v2/pongo"
 )
 
 // this test file aims to expose all tests file in tests/assets

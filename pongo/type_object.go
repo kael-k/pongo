@@ -41,20 +41,20 @@ func (o ObjectType) Process(action SchemaAction, dataPointer *DataPointer) (data
 	var processedObject = map[string]interface{}{}
 	for key := range d {
 		// load BaseSchemaType, run all pre-checks related to ObjectType
-		validator, ok := o.SchemaMap[key]
+		schemaNode, ok := o.SchemaMap[key]
 		if !ok {
 			schemaError = schemaError.Append(dataPointer.Path(), fmt.Errorf("cannot validate data as ObjectType at %s, cannot get key %s", dataPointer.Path(), key))
 			continue
 		}
 
 		// navigate the DataPointer
-		ptr := dataPointer.Push(key, d[key], &o)
+		ptr := dataPointer.Push(schemaNode, d[key], key)
 
 		switch action {
 		case SchemaActionSerialize:
-			processedObject[key], err = validator.Serialize(ptr)
+			processedObject[key], err = schemaNode.Serialize(ptr)
 		case SchemaActionParse:
-			processedObject[key], err = validator.Parse(ptr)
+			processedObject[key], err = schemaNode.Parse(ptr)
 		}
 
 		if err != nil {
